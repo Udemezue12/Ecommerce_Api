@@ -44,7 +44,7 @@ public class JobRunrConfig {
                 .useStorageProvider(databaseStorageProvider)
                 .useJobActivator(applicationContext::getBean)
                 .useBackgroundJobServer()
-                .useDashboard()
+//                .useDashboard()
                 .initialize()
                 .getJobScheduler();
 
