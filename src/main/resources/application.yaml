@@ -1,0 +1,128 @@
+spring:
+  application:
+    name: store
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  mvc:
+    dispatch-options-request: true
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+  flyway:
+    out-of-order: true
+  jwt:
+    secret: ${SECRET_KEY}
+    expiration: ${EXPIRATION}
+    accessExpiration: 900
+    refreshExpiration: 604800
+  datasource:
+    url: ${PROD_DB_URL}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 30000
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 50
+      type:
+        preferred_uuid_jdbc_type: BINARY
+  data:
+    redis:
+      url: ${REDIS_URL}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+      repositories:
+        enabled: false
+
+server:
+  port: 8080
+org:
+  jobrunr:
+    background-job-server:
+      enabled: true
+    dashboard:
+      enabled: false
+      # port: 8081
+    jobs:
+      default-number-of-retries: 5
+    database:
+      type: mysql
+    job-scheduler:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs/public
+  swagger-ui:
+    csrf:
+      enabled: true
+
+  group-configs:
+    - group: public
+      paths-to-match:
+        - /api/v1/**
+      paths-to-exclude:
+        - /api/admin/**
+        - /error
+        - /actuator/**
+payment:
+  paystack-secret-key: ${PAYSTACK_SECRET_KEY}
+  flutterwave-secret-key: ${FLUTTERWAVE_SECRET_KEY}
+logging:
+  level:
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    .org:
+      hibernate:
+        orm:
+          jdbc:
+            bind:TRACE:
+
+    org:
+      springframework:
+        security:
+          web:
+            csrf=TRACE:
+notification:
+  termii-base-url: ${TERMII_BASE_URL}
+  termii-api-key: ${TERMII_API_KEY}
+  termii-sender-id: ${TERMII_SENDER_ID}
+
+  brevo-api-key: ${BREVO_API_KEY}
+  brevo-url: https://api.brevo.com/v3/smtp/email
+
+  notification:
+  email-host: smtp.gmail.com
+  email-port: ${EMAIL_PORT:587}
+  email-username: ${EMAIL_USERNAME}
+  email-password: ${EMAIL_PASSWORD}
+  email-use-tls: true
+
+  frontend-url: ${FRONTEND_URL}
+stripe:
+  secretKey: ${STRIPE_SECRET_KEY}
+  webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
+auth:
+  redis-url: ${REDIS_URL}
+
+  reset-password-salt: ${RESET_PASSWORD_SALT}
+  reset-secret-key: ${RESET_SECRET_KEY}
+
+  verify-email-salt: ${VERIFY_EMAIL_SALT}
+  verify-email-secret-key: ${VERIFY_EMAIL_SECRET_KEY}
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-secret: ${CLOUDINARY_SECRET_KEY}
+  api-key: ${CLOUDINARY_API_KEY}
+  signature-version: ${CLOUDINARY_SIGNATURE_VERSION:1}
+
+application:
+  author: ${AUTHOR}
+  author-email: ${AUTHOR_EMAIL}
+  author-url: ${AUTHOR_URL}

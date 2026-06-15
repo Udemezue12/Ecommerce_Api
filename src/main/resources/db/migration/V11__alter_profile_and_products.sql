@@ -1,0 +1,18 @@
+ALTER TABLE products
+    ADD COLUMN resource_type VARCHAR(50) NULL,
+    ADD COLUMN image_hash VARCHAR(255) NULL,
+    ADD COLUMN public_id VARCHAR(255) NULL,
+    ADD COLUMN image_url TEXT NULL;
+
+
+
+ALTER TABLE profiles
+    ADD COLUMN resource_type VARCHAR(50) NULL,
+    ADD COLUMN image_hash VARCHAR(255) NULL,
+    ADD COLUMN public_id VARCHAR(255) NULL,
+    ADD COLUMN image_url TEXT NULL,
+
+    ADD COLUMN local_government VARCHAR(100) NULL,
+
+    ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN deleted_at DATETIME NULL;

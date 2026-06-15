@@ -1,0 +1,70 @@
+package com.uchechukwu.store.email.gmail;
+
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+
+import com.uchechukwu.store.config.NotificationProperties;
+import com.uchechukwu.store.core.NotificationCircuitBreaker;
+import com.uchechukwu.store.exceptions.NotificationException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class GmailClient {
+
+    private final JavaMailSender mailSender;
+    private final NotificationCircuitBreaker breaker;
+    private final NotificationProperties properties;
+
+    public void sendSmtpEmail(
+            String to,
+            String subject,
+            String htmlContent) {
+
+        breaker.execute(() -> {
+
+            try {
+
+                var message =
+                        mailSender.createMimeMessage();
+
+                var helper =
+                        new MimeMessageHelper(
+                                message,
+                                true,
+                                StandardCharsets.UTF_8.name());
+
+                helper.setTo(to);
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
+                helper.setFrom(
+                        properties.getEmailUsername());
+
+                mailSender.send(message);
+
+                log.info(
+                        "Email sent successfully to {}",
+                        to);
+
+                return true;
+
+            } catch (Exception ex) {
+
+                log.error(
+                        "Failed to send email to {}",
+                        to,
+                        ex);
+
+                throw new NotificationException(
+                        "Failed to send email",
+                        ex);
+            }
+        });
+    }
+}

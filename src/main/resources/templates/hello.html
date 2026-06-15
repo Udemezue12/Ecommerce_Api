@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">Store</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 50px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .hero-text {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            margin-bottom: 35px;
+        }
+
+        .btn-custom {
+            padding: 14px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+        }
+
+        .features {
+            margin-top: 40px;
+        }
+
+        .feature-box {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 16px;
+            transition: 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-box:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-4px);
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .feature-text {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="hero-card">
+
+        <h1 class="hero-title" th:text="${appName}">Store</h1>
+
+        <p class="hero-text">
+            Build scalable Spring Boot applications with clean architecture,
+            MySQL, Flyway migrations, JPA, and modern backend practices.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="#" class="btn btn-primary btn-custom">
+                Get Started
+            </a>
+
+            <a href="#" class="btn btn-outline-light btn-custom">
+                Documentation
+            </a>
+        </div>
+
+        <div class="row g-4 features">
+
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <h4 class="feature-title">Spring Boot</h4>
+                    <p class="feature-text">
+                        Fast backend development with production-ready setup.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <h4 class="feature-title">MySQL</h4>
+                    <p class="feature-text">
+                        Reliable relational database integration and scaling.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <h4 class="feature-title">Flyway</h4>
+                    <p class="feature-text">
+                        Version-controlled database migrations made simple.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

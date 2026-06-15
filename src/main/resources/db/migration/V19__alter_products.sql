@@ -1,0 +1,2 @@
+ALTER TABLE products
+    ADD COLUMN thumb_nail VARCHAR(255) NULL
