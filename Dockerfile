@@ -12,7 +12,10 @@ RUN ./mvnw dependency:go-offline
 
 COPY src src
 
-RUN ./mvnw clean package -DskipTests
+RUN PROD_DB_URL=jdbc:mysql://localhost:3306/dummy \
+    PROD_DB_USER=dummy \
+    PROD_DB_PASSWORD=dummy \
+    ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 

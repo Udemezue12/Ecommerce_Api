@@ -229,6 +229,7 @@
                             <files>
                                 <file>${project.basedir}/.env</file>
                             </files>
+                            <quiet>true</quiet>
                         </configuration>
                     </execution>
                 </executions>
@@ -256,11 +257,10 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>10.15.0</version>
-
                 <configuration>
-                    <url>${PROD_DB_URL}</url>
-                    <user>${PROD_DB_USER}</user>
-                    <password>${PROD_DB_PASSWORD}</password>
+                    <url>${env.PROD_DB_URL}</url>
+                    <user>${env.PROD_DB_USER}</user>
+                    <password>${env.PROD_DB_PASSWORD}</password>
                     <cleanDisabled>true</cleanDisabled>
                 </configuration>
             </plugin>
