@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,139 +25,129 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
-        @Value("${spring.data.redis.host}")
-        private String host;
+    private final RedisConfigurationProperties configRedis;
 
-        @Value("${spring.data.redis.username}")
-        private String username;
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
 
-        @Value("${spring.data.redis.password}")
-        private String password;
+        var redisConfig = new RedisStandaloneConfiguration();
 
-        @Value("${spring.data.redis.port}")
-        private int port;
+        redisConfig.setHostName(configRedis.getHost());
 
-        @Bean
-        public LettuceConnectionFactory redisConnectionFactory() {
+        redisConfig.setPort(configRedis.getPort());
 
-                var redisConfig = new RedisStandaloneConfiguration();
+        redisConfig.setPassword(configRedis.getPassword());
 
-                redisConfig.setHostName(host);
+        // redisConfig.setUsername(username);
 
-                redisConfig.setPort(port);
+        var socketOptions = SocketOptions.builder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
 
-                redisConfig.setPassword(password);
+        var clientOptions = ClientOptions.builder()
+                .autoReconnect(true)
+                .socketOptions(socketOptions)
+                .disconnectedBehavior(
+                        ClientOptions.DisconnectedBehavior.ACCEPT_COMMANDS)
+                .build();
 
-                // redisConfig.setUsername(username);
+        var clientConfig = LettuceClientConfiguration.builder()
+                .clientOptions(clientOptions)
+                .commandTimeout(Duration.ofSeconds(12))
+                .shutdownTimeout(Duration.ZERO)
+                // .useSsl()
+                .build();
 
-                var socketOptions = SocketOptions.builder()
-                                .connectTimeout(Duration.ofSeconds(10))
-                                .build();
+        return new LettuceConnectionFactory(
+                redisConfig,
+                clientConfig);
+    }
 
-                var clientOptions = ClientOptions.builder()
-                                .autoReconnect(true)
-                                .socketOptions(socketOptions)
-                                .disconnectedBehavior(
-                                                ClientOptions.DisconnectedBehavior.ACCEPT_COMMANDS)
-                                .build();
+    @Bean
+    public StringRedisTemplate stringRedisTemplate(
+            LettuceConnectionFactory connectionFactory) {
 
-                var clientConfig = LettuceClientConfiguration.builder()
-                                .clientOptions(clientOptions)
-                                .commandTimeout(Duration.ofSeconds(12))
-                                .shutdownTimeout(Duration.ZERO)
-                                // .useSsl()
-                                .build();
+        return new StringRedisTemplate(connectionFactory);
+    }
 
-                return new LettuceConnectionFactory(
-                                redisConfig,
-                                clientConfig);
-        }
+    @Bean
+    public GenericJackson2JsonRedisSerializer redisSerializer(
+            ObjectMapper objectMapper) {
 
-        @Bean
-        public StringRedisTemplate stringRedisTemplate(
-                        LettuceConnectionFactory connectionFactory) {
+        System.out.println(
+                "========== CUSTOM REDIS SERIALIZER LOADED ==========");
 
-                return new StringRedisTemplate(connectionFactory);
-        }
+        ObjectMapper redisMapper = objectMapper.copy();
 
-        @Bean
-        public GenericJackson2JsonRedisSerializer redisSerializer(
-                        ObjectMapper objectMapper) {
 
-                System.out.println(
-                                "========== CUSTOM REDIS SERIALIZER LOADED ==========");
+        redisMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY);
 
-                ObjectMapper redisMapper = objectMapper.copy();
+        return new GenericJackson2JsonRedisSerializer(redisMapper);
+    }
 
-                // Use NON_FINAL instead of deprecated EVERYTHING
-                // activateDefaultTyping overload with 3 args (validator, typing, include)
-                redisMapper.activateDefaultTyping(
-                                LaissezFaireSubTypeValidator.instance,
-                                ObjectMapper.DefaultTyping.NON_FINAL,
-                                JsonTypeInfo.As.PROPERTY);
+    @Bean
+    public ObjectMapper objectMapper() {
+        var mapper = new ObjectMapper();
 
-                return new GenericJackson2JsonRedisSerializer(redisMapper);
-        }
+        // 1. Support Java 8 Date/Time types
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        @Bean
-        public ObjectMapper objectMapper() {
-                var mapper = new ObjectMapper();
+        return mapper;
+    }
 
-                // 1. Support Java 8 Date/Time types
-                mapper.registerModule(new JavaTimeModule());
-                mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(
+            LettuceConnectionFactory connectionFactory, ObjectMapper objectMapper,
+            GenericJackson2JsonRedisSerializer serializer) {
 
-                return mapper;
-        }
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
 
-        @Bean
-        public RedisTemplate<String, Object> redisTemplate(
-                        LettuceConnectionFactory connectionFactory, ObjectMapper objectMapper,
-                        GenericJackson2JsonRedisSerializer serializer) {
+        template.setConnectionFactory(connectionFactory);
 
-                RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setKeySerializer(
+                new StringRedisSerializer());
 
-                template.setConnectionFactory(connectionFactory);
+        template.setValueSerializer(
+                serializer);
 
-                template.setKeySerializer(
-                                new StringRedisSerializer());
+        template.setHashKeySerializer(
+                new StringRedisSerializer());
 
-                template.setValueSerializer(
-                                serializer);
+        template.setHashValueSerializer(
+                serializer);
+        template.setEnableTransactionSupport(true);
 
-                template.setHashKeySerializer(
-                                new StringRedisSerializer());
+        template.afterPropertiesSet();
 
-                template.setHashValueSerializer(
-                                serializer);
-                template.setEnableTransactionSupport(true);
+        return template;
+    }
 
-                template.afterPropertiesSet();
+    @Bean
+    public CacheManager cacheManager(
+            LettuceConnectionFactory connectionFactory,
+            GenericJackson2JsonRedisSerializer serializer) {
 
-                return template;
-        }
+        var config = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(10))
+                .disableCachingNullValues()
+                .serializeKeysWith(
+                        RedisSerializationContext.SerializationPair
+                                .fromSerializer(
+                                        new StringRedisSerializer()))
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair
+                                .fromSerializer(serializer));
 
-        @Bean
-        public CacheManager cacheManager(
-                        LettuceConnectionFactory connectionFactory,
-                        GenericJackson2JsonRedisSerializer serializer) {
-
-                var config = RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(10))
-                                .disableCachingNullValues()
-                                .serializeKeysWith(
-                                                RedisSerializationContext.SerializationPair
-                                                                .fromSerializer(
-                                                                                new StringRedisSerializer()))
-                                .serializeValuesWith(
-                                                RedisSerializationContext.SerializationPair
-                                                                .fromSerializer(serializer));
-
-                return RedisCacheManager.builder(connectionFactory)
-                                .cacheDefaults(config)
-                                .transactionAware()
-                                .build();
-        }
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(config)
+                .transactionAware()
+                .build();
+    }
 }

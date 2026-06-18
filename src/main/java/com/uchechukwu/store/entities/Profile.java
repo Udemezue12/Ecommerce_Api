@@ -33,7 +33,11 @@ public class Profile {
     @Column(name = "loyalty_points")
     private Integer loyaltyPoints;
     @Column(name = "deleted")
-    private Boolean deleted;
+    private boolean deleted = false;
+    @Column(name = "suspended")
+    private boolean suspended = false;
+    @Column(name = "suspended_at")
+    private LocalDateTime suspendedAt;
 
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
@@ -50,4 +54,6 @@ public class Profile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
+
+
 }

@@ -16,6 +16,8 @@ import com.uchechukwu.store.validators.RequestValidators;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,6 +45,15 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var user = userRepo.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not Found"));
+        if (user.isDeleted()) {
+            throw new DisabledException(
+                    "Account deleted");
+        }
+
+        if (user.isSuspended()) {
+            throw new LockedException(
+                    "Account suspended");
+        }
         return new User(
                 user.getEmail(),
                 user.getPassword(),

@@ -1,143 +1,2219 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${appName}">Store</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle != null ? pageTitle + ' · Astro Stores' : 'Astro Stores'}">Astro Stores</title>
+    <meta name="description" content="Astro Stores — premium products curated for the modern explorer."/>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts: Syne (display) + DM Sans (body) + Space Mono (prices/code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap"
+          rel="stylesheet"/>
 
     <style>
+        /* ═══════════════════════════════════════════════════════════════
+           TOKEN SYSTEM
+        ═══════════════════════════════════════════════════════════════ */
+        :root {
+            /* Palette */
+            --ink: #0A0F1E;
+            --obsidian: #131B2E;
+            --card: #171F36;
+            --card-2: #1E2844;
+            --teal: #00C9A7;
+            --teal-dim: rgba(0, 201, 167, .12);
+            --amber: #F5A623;
+            --amber-dim: rgba(245, 166, 35, .12);
+            --chalk: #E8EDF5;
+            --slate: #8899BB;
+            --border: rgba(136, 153, 187, .14);
+            --border-hi: rgba(0, 201, 167, .28);
+            --glass: rgba(19, 27, 46, .82);
+            --danger: #FF5C5C;
+
+            /* Type */
+            --display: 'Syne', sans-serif;
+            --body: 'DM Sans', sans-serif;
+            --mono: 'Space Mono', monospace;
+
+            /* Radius */
+            --r-xs: 6px;
+            --r-sm: 10px;
+            --r-md: 16px;
+            --r-lg: 22px;
+            --r-xl: 32px;
+            --r-pill: 999px;
+
+            /* Motion */
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --t: 0.24s var(--ease);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           BASE
+        ═══════════════════════════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            font-family: var(--body);
+            background: var(--ink);
+            color: var(--chalk);
             min-height: 100vh;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .hero-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 50px;
+        img {
+            display: block;
+            max-width: 100%;
+            object-fit: cover;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        ul, ol {
+            list-style: none;
+        }
+
+        input, select {
+            font-family: inherit;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--ink);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--card-2);
+            border-radius: var(--r-pill);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           LAYOUT
+        ═══════════════════════════════════════════════════════════════ */
+        .wrap {
             width: 100%;
-            max-width: 700px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            text-align: center;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
 
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 20px;
+        /* ═══════════════════════════════════════════════════════════════
+           UTILITY
+        ═══════════════════════════════════════════════════════════════ */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
         }
 
-        .hero-text {
-            color: #cbd5e1;
-            font-size: 1.1rem;
-            margin-bottom: 35px;
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--mono);
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: var(--r-pill);
         }
 
-        .btn-custom {
-            padding: 14px 30px;
-            font-size: 1rem;
+        .chip--teal {
+            background: var(--teal-dim);
+            color: var(--teal);
+            border: 1px solid rgba(0, 201, 167, .25);
+        }
+
+        .chip--amber {
+            background: var(--amber-dim);
+            color: var(--amber);
+            border: 1px solid rgba(245, 166, 35, .25);
+        }
+
+        .chip--slate {
+            background: rgba(136, 153, 187, .1);
+            color: var(--slate);
+            border: 1px solid rgba(136, 153, 187, .2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-family: var(--display);
+            font-size: 13.5px;
             font-weight: 600;
-            border-radius: 12px;
-            transition: 0.3s ease;
+            padding: 10px 20px;
+            border-radius: var(--r-sm);
+            transition: all var(--t);
+            white-space: nowrap;
+            letter-spacing: .01em;
         }
 
-        .btn-custom:hover {
-            transform: translateY(-2px);
+        .btn--teal {
+            background: var(--teal);
+            color: var(--ink);
+            box-shadow: 0 0 22px rgba(0, 201, 167, .35);
         }
 
-        .features {
-            margin-top: 40px;
+        .btn--teal:hover {
+            box-shadow: 0 0 36px rgba(0, 201, 167, .55);
+            transform: translateY(-1px);
         }
 
-        .feature-box {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 16px;
-            transition: 0.3s ease;
+        .btn--ghost {
+            border: 1px solid var(--border);
+            color: var(--slate);
+        }
+
+        .btn--ghost:hover {
+            border-color: var(--border-hi);
+            color: var(--chalk);
+            background: var(--teal-dim);
+        }
+
+        .btn--danger {
+            background: rgba(255, 92, 92, .12);
+            color: var(--danger);
+            border: 1px solid rgba(255, 92, 92, .25);
+        }
+
+        .btn--danger:hover {
+            background: rgba(255, 92, 92, .22);
+        }
+
+        .btn--sm {
+            font-size: 12px;
+            padding: 7px 14px;
+        }
+
+        .btn--icon {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--slate);
+            font-size: 15px;
+            transition: all var(--t);
+        }
+
+        .btn--icon:hover {
+            border-color: var(--border-hi);
+            color: var(--chalk);
+            background: var(--teal-dim);
+        }
+
+        .btn--icon.active {
+            border-color: rgba(255, 92, 92, .4);
+            color: var(--danger);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           AMBIENT GLOW (signature element — single, disciplined)
+        ═══════════════════════════════════════════════════════════════ */
+        .ambient {
+            position: fixed;
+            top: -220px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(0, 201, 167, .09) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           NAVIGATION
+        ═══════════════════════════════════════════════════════════════ */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: var(--glass);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(18px) saturate(1.5);
+            -webkit-backdrop-filter: blur(18px) saturate(1.5);
+        }
+
+        .nav__inner {
+            display: flex;
+            align-items: center;
+            height: 64px;
+            gap: 20px;
+        }
+
+        .nav__logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: var(--display);
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+            flex-shrink: 0;
+        }
+
+        .nav__logo-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--teal), #005A50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .nav__logo em {
+            color: var(--teal);
+            font-style: normal;
+        }
+
+        .nav__search-wrap {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .nav__search {
+            width: 100%;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 9px 14px 9px 38px;
+            font-size: 13.5px;
+            color: var(--chalk);
+            outline: none;
+            transition: border-color var(--t);
+        }
+
+        .nav__search:focus {
+            border-color: var(--border-hi);
+        }
+
+        .nav__search::placeholder {
+            color: var(--slate);
+        }
+
+        .nav__search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--slate);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .nav__right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .cart-btn {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all var(--t);
+        }
+
+        .cart-btn:hover {
+            border-color: var(--border-hi);
+            background: var(--teal-dim);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: var(--r-pill);
+            background: var(--teal);
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--ink);
+            padding: 0 3px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           HERO — condensed, focused (the logo/brand thesis is the headline)
+        ═══════════════════════════════════════════════════════════════ */
+        .hero {
+            padding: 52px 0 44px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--teal-dim), transparent);
+        }
+
+        .hero__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .hero__eyebrow {
+            margin-bottom: 14px;
+        }
+
+        .hero__title {
+            font-family: var(--display);
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+            line-height: 1.05;
+            max-width: 520px;
+        }
+
+        .hero__title mark {
+            background: linear-gradient(90deg, var(--teal), #4EFADC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero__sub {
+            font-size: 15px;
+            color: var(--slate);
+            line-height: 1.6;
+            margin-top: 12px;
+            max-width: 420px;
+        }
+
+        .hero__stats {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat__num {
+            font-family: var(--display);
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--chalk);
+            letter-spacing: -.03em;
+        }
+
+        .hero-stat__num span {
+            color: var(--teal);
+        }
+
+        .hero-stat__label {
+            font-size: 11px;
+            color: var(--slate);
+            margin-top: 2px;
+            letter-spacing: .04em;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           PAGE BODY — sidebar + main
+        ═══════════════════════════════════════════════════════════════ */
+        .page-body {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 0;
+            min-height: 80vh;
+            position: relative;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           SIDEBAR
+        ═══════════════════════════════════════════════════════════════ */
+        .sidebar {
+            border-right: 1px solid var(--border);
+            padding: 32px 24px;
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .sidebar__section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar__label {
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--slate);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar__label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Category list */
+        .cat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .cat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 12px;
+            border-radius: var(--r-sm);
+            font-size: 13.5px;
+            color: var(--slate);
+            cursor: pointer;
+            transition: all var(--t);
+            border: 1px solid transparent;
+        }
+
+        .cat-item:hover {
+            color: var(--chalk);
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .cat-item.active {
+            color: var(--teal);
+            background: var(--teal-dim);
+            border-color: rgba(0, 201, 167, .2);
+            font-weight: 600;
+        }
+
+        .cat-item__name {
+            flex: 1;
+        }
+
+        .cat-item__dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--teal);
+            opacity: 0;
+            transition: opacity var(--t);
+        }
+
+        .cat-item.active .cat-item__dot {
+            opacity: 1;
+        }
+
+        /* Sort */
+        .sort-select {
+            width: 100%;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 9px 12px;
+            font-size: 13px;
+            color: var(--chalk);
+            outline: none;
+            cursor: pointer;
+            transition: border-color var(--t);
+        }
+
+        .sort-select:focus {
+            border-color: var(--border-hi);
+        }
+
+        .sort-select option {
+            background: var(--obsidian);
+        }
+
+        /* Price range */
+        .price-range {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .price-input {
+            width: 100%;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--chalk);
+            outline: none;
+            transition: border-color var(--t);
+        }
+
+        .price-input:focus {
+            border-color: var(--border-hi);
+        }
+
+        .price-input::placeholder {
+            color: var(--slate);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           MAIN CONTENT
+        ═══════════════════════════════════════════════════════════════ */
+        .main {
+            padding: 32px 32px 64px;
+        }
+
+        .main__toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .main__count {
+            font-size: 13px;
+            color: var(--slate);
+        }
+
+        .main__count strong {
+            color: var(--chalk);
+            font-family: var(--mono);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .view-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--border);
+            border-radius: var(--r-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--slate);
+            transition: all var(--t);
+        }
+
+        .view-btn.active {
+            border-color: var(--border-hi);
+            color: var(--teal);
+            background: var(--teal-dim);
+        }
+
+        .view-btn:hover:not(.active) {
+            color: var(--chalk);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           PRODUCT GRID
+        ═══════════════════════════════════════════════════════════════ */
+        #productsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        #productsGrid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        /* ── Product Card ────────────────────────────────────────────── */
+        .pcard {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            overflow: hidden;
+            transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .pcard:hover {
+            border-color: rgba(0, 201, 167, .22);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+            transform: translateY(-3px);
+        }
+
+        /* List view variant */
+        #productsGrid.list-view .pcard {
+            flex-direction: row;
+            align-items: stretch;
+            transform: none !important;
+        }
+
+        #productsGrid.list-view .pcard__img-wrap {
+            width: 160px;
+            flex-shrink: 0;
+            aspect-ratio: auto;
             height: 100%;
         }
 
-        .feature-box:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-4px);
+        #productsGrid.list-view .pcard__body {
+            flex: 1;
         }
 
-        .feature-title {
-            font-size: 1.2rem;
-            font-weight: bold;
+        .pcard__img-wrap {
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #111826, #1A2540);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pcard__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .45s var(--ease);
+        }
+
+        .pcard:hover .pcard__img {
+            transform: scale(1.04);
+        }
+
+        /* Image placeholder when no URL */
+        .pcard__img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: linear-gradient(135deg, #111826 0%, #1A254030 100%);
+        }
+
+        /* Image count indicator */
+        .pcard__img-count {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 700;
+            background: rgba(10, 15, 30, .7);
+            color: var(--slate);
+            padding: 3px 7px;
+            border-radius: var(--r-pill);
+            backdrop-filter: blur(4px);
+        }
+
+        .pcard__wishlist {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+        }
+
+        .pcard__cat-chip {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+        }
+
+        .pcard__body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .pcard__name {
+            font-family: var(--display);
+            font-size: 14.5px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 7px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .pcard__desc {
+            font-size: 12px;
+            color: var(--slate);
+            line-height: 1.55;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .pcard__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .pcard__price {
+            font-family: var(--mono);
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--chalk);
+        }
+
+        .pcard__price sup {
+            font-size: 11px;
+            color: var(--slate);
+            vertical-align: super;
+            margin-right: 1px;
+        }
+
+        .pcard__add {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--teal-dim);
+            border: 1px solid rgba(0, 201, 167, .25);
+            color: var(--teal);
+            border-radius: var(--r-sm);
+            padding: 8px 14px;
+            font-family: var(--display);
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: all var(--t);
+        }
+
+        .pcard__add:hover {
+            background: var(--teal);
+            color: var(--ink);
+            border-color: var(--teal);
+            box-shadow: 0 0 18px rgba(0, 201, 167, .4);
+        }
+
+        .pcard__add.adding {
+            background: var(--obsidian);
+            color: var(--slate);
+            border-color: var(--border);
+            pointer-events: none;
+        }
+
+        .pcard__add.added {
+            background: rgba(0, 201, 167, .25);
+            color: var(--teal);
+            border-color: var(--border-hi);
+            pointer-events: none;
+        }
+
+        .pcard__detail-link {
+            display: block;
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--slate);
             margin-top: 10px;
+            padding: 6px;
+            border-radius: var(--r-xs);
+            border: 1px solid transparent;
+            transition: all var(--t);
         }
 
-        .feature-text {
-            color: #cbd5e1;
-            font-size: 0.95rem;
+        .pcard__detail-link:hover {
+            color: var(--teal);
+            border-color: var(--border);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           SKELETON LOADER
+        ═══════════════════════════════════════════════════════════════ */
+        .skeleton {
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        .skel-block {
+            background: linear-gradient(90deg, var(--card) 25%, var(--card-2) 50%, var(--card) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease infinite;
+            border-radius: var(--r-xs);
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .pcard--skeleton {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .pcard--skeleton .sk-img {
+            height: 180px;
+        }
+
+        .pcard--skeleton .sk-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pcard--skeleton .sk-name {
+            height: 16px;
+            width: 70%;
+        }
+
+        .pcard--skeleton .sk-desc {
+            height: 12px;
+            width: 90%;
+        }
+
+        .pcard--skeleton .sk-desc2 {
+            height: 12px;
+            width: 55%;
+        }
+
+        .pcard--skeleton .sk-foot {
+            height: 32px;
+            margin-top: 8px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           PAGINATION
+        ═══════════════════════════════════════════════════════════════ */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--slate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--t);
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--border-hi);
+            color: var(--chalk);
+            background: var(--teal-dim);
+        }
+
+        .page-btn.active {
+            background: var(--teal);
+            color: var(--ink);
+            border-color: var(--teal);
+            font-weight: 700;
+        }
+
+        .page-btn:disabled {
+            opacity: .3;
+            pointer-events: none;
+        }
+
+        .page-info {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--slate);
+            padding: 0 8px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           EMPTY STATE
+        ═══════════════════════════════════════════════════════════════ */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 72px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .empty-state__icon {
+            font-size: 56px;
+            opacity: .4;
+        }
+
+        .empty-state__title {
+            font-family: var(--display);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .empty-state__sub {
+            font-size: 14px;
+            color: var(--slate);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           ERROR BANNER
+        ═══════════════════════════════════════════════════════════════ */
+        .error-banner {
+            background: rgba(255, 92, 92, .08);
+            border: 1px solid rgba(255, 92, 92, .25);
+            border-radius: var(--r-sm);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            color: var(--danger);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-banner.visible {
+            display: flex;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TOAST
+        ═══════════════════════════════════════════════════════════════ */
+        #toastRoot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            min-width: 220px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+            animation: toast-in .3s var(--ease), toast-out .3s 2.7s var(--ease) forwards;
+        }
+
+        .toast--ok {
+            border-color: rgba(0, 201, 167, .3);
+        }
+
+        .toast--err {
+            border-color: rgba(255, 92, 92, .3);
+        }
+
+        .toast__icon {
+            font-size: 15px;
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateX(16px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes toast-out {
+            to {
+                opacity: 0;
+                transform: translateX(16px);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           PRODUCT DETAIL DRAWER
+        ═══════════════════════════════════════════════════════════════ */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(10, 15, 30, .72);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--t);
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(520px, 100vw);
+            background: var(--obsidian);
+            border-left: 1px solid var(--border);
+            z-index: 301;
+            transform: translateX(100%);
+            transition: transform .35s var(--ease);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.open {
+            transform: none;
+        }
+
+        .drawer__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--obsidian);
+            z-index: 2;
+        }
+
+        .drawer__title {
+            font-family: var(--display);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .drawer__body {
+            padding: 24px;
+            flex: 1;
+        }
+
+        /* Drawer image gallery */
+        .drawer__gallery {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .drawer__main-img {
+            width: 100%;
+            border-radius: var(--r-md);
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            background: linear-gradient(135deg, #111826, #1A2540);
+        }
+
+        .drawer__main-placeholder {
+            width: 100%;
+            border-radius: var(--r-md);
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #111826, #1A2540);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+
+        .drawer__thumbs {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .drawer__thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--r-sm);
+            object-fit: cover;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color var(--t);
+        }
+
+        .drawer__thumb.active, .drawer__thumb:hover {
+            border-color: var(--teal);
+        }
+
+        .drawer__name {
+            font-family: var(--display);
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -.025em;
+            margin-bottom: 10px;
+        }
+
+        .drawer__cat {
+            margin-bottom: 16px;
+        }
+
+        .drawer__desc {
+            font-size: 14px;
+            color: var(--slate);
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        .drawer__price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+        }
+
+        .drawer__price-label {
+            font-size: 11px;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .drawer__price-val {
+            font-family: var(--mono);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--chalk);
+        }
+
+        .drawer__actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .drawer__add {
+            flex: 1;
+            padding: 14px;
+            font-size: 15px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════════════════════════════ */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 0 28px;
+            margin-top: auto;
+        }
+
+        .footer__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer__copy {
+            font-size: 12.5px;
+            color: var(--slate);
+        }
+
+        .footer__links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer__link {
+            font-size: 12.5px;
+            color: var(--slate);
+            transition: color var(--t);
+        }
+
+        .footer__link:hover {
+            color: var(--teal);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════════════════════════════ */
+        @media (max-width: 900px) {
+            .page-body {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 20px 24px;
+            }
+
+            .cat-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .cat-item {
+                padding: 6px 12px;
+            }
+
+            .sidebar__section + .sidebar__section {
+                display: none;
+            }
+
+            /* hide sort/price on mobile */
+            .main {
+                padding: 24px 16px 48px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #productsGrid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 12px;
+            }
+
+            .hero__stats {
+                gap: 24px;
+            }
+
+            .hero {
+                padding: 36px 0 32px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
         }
     </style>
 </head>
-
 <body>
 
-<div class="container">
-    <div class="hero-card">
+<!-- Ambient glow — the single signature atmospheric element -->
+<div class="ambient" aria-hidden="true"></div>
 
-        <h1 class="hero-title" th:text="'Welcome to my ' + ${appName}"></h1>
+<!-- Toast root -->
+<div id="toastRoot" aria-live="polite"></div>
 
-        <p class="hero-text">
-            Build scalable Spring Boot applications with clean architecture,
-            MySQL, Flyway migrations, JPA, and modern backend practices.
-        </p>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PRODUCT DETAIL DRAWER
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="productDrawer" aria-label="Product details" role="dialog">
+    <div class="drawer__header">
+        <span class="drawer__title" id="drawerTitle">Product Details</span>
+        <button class="btn--icon" onclick="closeDrawer()" aria-label="Close">&times;</button>
+    </div>
+    <div class="drawer__body" id="drawerBody">
+        <!-- Populated by JS -->
+    </div>
+</aside>
 
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="#" class="btn btn-primary btn-custom">
-                Get Started
+<!-- ═══════════════════════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════════════════════ -->
+<nav class="nav" role="navigation" aria-label="Main">
+    <div class="wrap">
+        <div class="nav__inner">
+            <a class="nav__logo" th:href="@{/}" href="/">
+                <div class="nav__logo-mark" aria-hidden="true">✦</div>
+                Astro<em>Stores</em>
             </a>
 
-            <a href="#" class="btn btn-outline-light btn-custom">
-                Documentation
-            </a>
+            <div class="nav__search-wrap">
+                <span class="nav__search-icon" aria-hidden="true">⌕</span>
+                <input class="nav__search" type="search" id="searchInput"
+                       placeholder="Search products…" aria-label="Search products"
+                       autocomplete="off"/>
+            </div>
+
+            <div class="nav__right">
+                <button class="btn btn--ghost btn--sm" style="display:none" id="clearFiltersBtn"
+                        onclick="clearFilters()">
+                    ✕ Clear filters
+                </button>
+                <button class="cart-btn" id="cartBtn" aria-label="Cart">
+                    🛒
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
         </div>
+    </div>
+</nav>
 
-        <div class="row g-4 features">
-
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <h4 class="feature-title">Spring Boot</h4>
-                    <p class="feature-text">
-                        Fast backend development with production-ready setup.
-                    </p>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════════════════ -->
+<header class="hero">
+    <div class="wrap">
+        <div class="hero__inner">
+            <div>
+                <div class="hero__eyebrow">
+                    <span class="chip chip--teal">✦ Live catalogue</span>
                 </div>
+                <h1 class="hero__title"
+                    th:utext="${heroTitle ?: 'Everything you need,<br/><mark>one orbit away.</mark>'}">
+                    Everything you need,<br/>
+                    <mark>one orbit away.</mark>
+                </h1>
+                <p class="hero__sub"
+                   th:text="${heroSub ?: 'Curated products updated in real time. Browse by category or search across the full catalogue.'}">
+                    Curated products updated in real time. Browse by category or search across the full catalogue.
+                </p>
             </div>
 
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <h4 class="feature-title">MySQL</h4>
-                    <p class="feature-text">
-                        Reliable relational database integration and scaling.
-                    </p>
+            <div class="hero__stats">
+                <div>
+                    <div class="hero-stat__num" id="statProducts">
+                        <span th:text="${totalProducts ?: '—'}">—</span>
+                    </div>
+                    <div class="hero-stat__label">Products</div>
+                </div>
+                <div>
+                    <div class="hero-stat__num" id="statCategories">
+                        <span th:text="${totalCategories ?: '—'}">—</span>
+                    </div>
+                    <div class="hero-stat__label">Categories</div>
+                </div>
+                <div>
+                    <div class="hero-stat__num">
+                        <span style="color:var(--teal)">★</span>
+                        <span th:text="${avgRating ?: '4.9'}">4.9</span>
+                    </div>
+                    <div class="hero-stat__label">Avg. rating</div>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <h4 class="feature-title">Flyway</h4>
-                    <p class="feature-text">
-                        Version-controlled database migrations made simple.
-                    </p>
-                </div>
-            </div>
-
         </div>
+    </div>
+</header>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PAGE BODY
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="wrap">
+    <div class="page-body">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" aria-label="Filters">
+
+            <!-- Categories -->
+            <div class="sidebar__section">
+                <div class="sidebar__label">Categories</div>
+
+                <!--
+                    Thymeleaf server-side render:
+                    Model attribute: List<CategoryDto> categories
+                    CategoryDto: UUID id, String name
+                -->
+                <ul class="cat-list" id="catList" role="list">
+
+                    <li>
+                        <button class="cat-item active" data-cat-id=""
+                                onclick="selectCategory(this, '', 'All Products')"
+                                aria-pressed="true">
+                            <span class="cat-item__name">All Products</span>
+                            <span class="cat-item__dot" aria-hidden="true"></span>
+                        </button>
+                    </li>
+
+                    <!-- Thymeleaf loop over server-rendered categories -->
+                    <li th:each="cat : ${categories}">
+                        <button class="cat-item"
+                                th:attr="data-cat-id=${cat.id()}"
+                                th:onclick="|selectCategory(this, '${cat.id()}', '${cat.name()}')|"
+                                aria-pressed="false">
+                            <span class="cat-item__name" th:text="${cat.name()}">Category</span>
+                            <span class="cat-item__dot" aria-hidden="true"></span>
+                        </button>
+                    </li>
+
+                    <!-- JS will append categories if Thymeleaf list is null (pure SPA fallback) -->
+                </ul>
+            </div>
+
+            <!-- Sort -->
+            <div class="sidebar__section">
+                <div class="sidebar__label">Sort by</div>
+                <select class="sort-select" id="sortSelect" onchange="applySort(this.value)"
+                        aria-label="Sort products">
+                    <option value="">Default</option>
+                    <option value="name">Name A→Z</option>
+                    <option value="name_desc">Name Z→A</option>
+                    <option value="price">Price Low→High</option>
+                    <option value="price_desc">Price High→Low</option>
+                </select>
+            </div>
+
+            <!-- Page size -->
+            <div class="sidebar__section">
+                <div class="sidebar__label">Per page</div>
+                <select class="sort-select" id="sizeSelect" onchange="applySize(this.value)"
+                        aria-label="Products per page">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main" id="mainContent">
+
+            <div class="error-banner" id="errorBanner" role="alert">
+                <span>⚠</span>
+                <span id="errorMsg">Failed to load products.</span>
+                <button class="btn btn--sm btn--ghost" onclick="retryLoad()" style="margin-left:auto">Retry</button>
+            </div>
+
+            <div class="main__toolbar">
+                <div class="main__count" id="resultCount">
+                    Showing <strong id="countShowing">—</strong> products
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <div class="view-toggle" role="group" aria-label="View mode">
+                        <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" aria-pressed="true"
+                                title="Grid view">▦
+                        </button>
+                        <button class="view-btn" id="listViewBtn" onclick="setView('list')" aria-pressed="false"
+                                title="List view">☰
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products grid — Thymeleaf server-side render + JS SPA overlay -->
+            <div id="productsGrid" role="list" aria-label="Products">
+
+                <!--
+                    SERVER-SIDE RENDER (Thymeleaf)
+                    Model attribute: ProductsPageDto productsPage
+                    ProductsPageDto: List<ProductsDto> content, int page, int size,
+                                     long totalElements, int totalPages, boolean first, boolean last
+                    ProductsDto is assumed to match ProductDto fields:
+                                     UUID id, String name, String description,
+                                     BigDecimal price, List<String> imageUrls,
+                                     UUID categoryId, String categoryName
+                -->
+                <th:block th:if="${productsPage != null and !productsPage.content().isEmpty()}">
+                    <article th:each="p : ${productsPage.content()}"
+                             class="pcard"
+                             th:attr="data-product-id=${p.id()}"
+                             role="listitem">
+
+                        <div class="pcard__img-wrap">
+                            <th:block th:if="${p.imageUrls() != null and !p.imageUrls().isEmpty()}">
+                                <img class="pcard__img"
+                                     th:src="${p.imageUrls()[0]}"
+                                     th:alt="${p.name()}"
+                                     loading="lazy"/>
+                                <span class="pcard__img-count"
+                                      th:if="${p.imageUrls().size() > 1}"
+                                      th:text="${p.imageUrls().size()} + ' photos'">
+                                </span>
+                            </th:block>
+                            <th:block th:if="${p.imageUrls() == null or p.imageUrls().isEmpty()}">
+                                <div class="pcard__img-placeholder">📦</div>
+                            </th:block>
+
+                            <div class="pcard__cat-chip">
+                                <span class="chip chip--slate" th:text="${p.categoryName()}">Category</span>
+                            </div>
+                            <div class="pcard__wishlist">
+                                <button class="btn--icon" aria-label="Add to wishlist"
+                                        th:onclick="|toggleWishlist(this, '${p.id()}')|">♡
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pcard__body">
+                            <h2 class="pcard__name" th:text="${p.name()}">Product Name</h2>
+                            <p class="pcard__desc" th:text="${p.description()}">Description</p>
+                            <div class="pcard__footer">
+                                <div class="pcard__price">
+                                    <sup>$</sup><span
+                                        th:text="${#numbers.formatDecimal(p.price(),1,'COMMA',2,'POINT')}">0.00</span>
+                                </div>
+                                <button class="pcard__add"
+                                        th:onclick="|addToCart(this, '${p.id()}', '${p.name()}', ${p.price()})|"
+                                        th:aria-label="|Add ${p.name()} to cart|">
+                                    + Add
+                                </button>
+                            </div>
+                            <a class="pcard__detail-link"
+                               href="javascript:void(0)"
+                               th:onclick="|openDrawer('${p.id()}')|">
+                                View details →
+                            </a>
+                        </div>
+                    </article>
+                </th:block>
+
+                <!-- Empty server-side state -->
+                <div th:if="${productsPage == null or productsPage.content().isEmpty()}"
+                     class="empty-state" id="ssrEmpty">
+                    <div class="empty-state__icon">🛸</div>
+                    <div class="empty-state__title">No products yet</div>
+                    <div class="empty-state__sub">Products will appear here once they're added to the catalogue.</div>
+                </div>
+
+            </div>
+
+            <!-- Pagination — server-side -->
+            <nav class="pagination" id="ssrPagination" aria-label="Page navigation"
+                 th:if="${productsPage != null and productsPage.totalPages() > 1}">
+                <button class="page-btn"
+                        th:disabled="${productsPage.first()}"
+                        th:onclick="|loadPage(${productsPage.page() - 1})|"
+                        aria-label="Previous page">
+                    ←
+                </button>
+
+                <th:block th:each="i : ${#numbers.sequence(0, productsPage.totalPages() - 1)}">
+                    <button class="page-btn"
+                            th:classappend="${i == productsPage.page() ? ' active' : ''}"
+                            th:text="${i + 1}"
+                            th:onclick="|loadPage(${i})|"
+                            th:aria-label="|Page ${i + 1}|"
+                            th:aria-current="${i == productsPage.page() ? 'page' : 'false'}">
+                    </button>
+                </th:block>
+
+                <button class="page-btn"
+                        th:disabled="${productsPage.last()}"
+                        th:onclick="|loadPage(${productsPage.page() + 1})|"
+                        aria-label="Next page">
+                    →
+                </button>
+
+                <span class="page-info"
+                      th:text="|${productsPage.page() + 1} / ${productsPage.totalPages()} · ${productsPage.totalElements()} items|">
+                </span>
+            </nav>
+
+            <!-- JS-rendered pagination (replaces ssr when JS takes over) -->
+            <nav class="pagination" id="jsPagination" aria-label="Page navigation" style="display:none"></nav>
+
+        </main>
     </div>
 </div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="wrap">
+        <div class="footer__inner">
+            <span class="footer__copy"
+                  th:text="|© ${#dates.year(#dates.createNow())} Astro Stores. All rights reserved.|">
+                © 2025 Astro Stores. All rights reserved.
+            </span>
+            <nav class="footer__links" aria-label="Footer links">
+                <a class="footer__link" th:href="@{/privacy}" href="#">Privacy</a>
+                <a class="footer__link" th:href="@{/terms}" href="#">Terms</a>
+                <a class="footer__link" th:href="@{/contact}" href="#">Contact</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SCRIPTS
+     csrf.js is loaded first so CSRF.csrfFetch is available to app.js
+═══════════════════════════════════════════════════════════════════════ -->
+<script th:src="@{/js/csrf.js}" src="/js/csrf.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // ── State ───────────────────────────────────────────────────────────────
+    const state = {
+        page: /*[[${productsPage?.page() ?: 0}]]*/ 0,
+        size: /*[[${productsPage?.size() ?: 10}]]*/ 10,
+        sort: '',
+        categoryId: null,
+        categoryName: 'All Products',
+        searchQuery: '',
+        cartCount: 0,
+        cartItems: [],       // {id, name, price, qty}
+        wishlist: new Set(),
+        view: 'grid',
+    };
+
+    const API = '/api/v1';
+
+    // ── Cart ─────────────────────────────────────────────────────────────────
+    function addToCart(btn, productId, name, price) {
+        btn.classList.add('adding');
+        btn.textContent = '…';
+
+        const existing = state.cartItems.find(i => i.id === productId);
+        if (existing) {
+            existing.qty++;
+        } else {
+            state.cartItems.push({id: productId, name, price, qty: 1});
+        }
+        state.cartCount = state.cartItems.reduce((s, i) => s + i.qty, 0);
+        document.getElementById('cartBadge').textContent = state.cartCount;
+
+        setTimeout(() => {
+            btn.classList.remove('adding');
+            btn.classList.add('added');
+            btn.textContent = '✓ Added';
+            setTimeout(() => {
+                btn.classList.remove('added');
+                btn.textContent = '+ Add';
+            }, 1800);
+        }, 500);
+
+        showToast('ok', `${name} added to cart`);
+    }
+
+    // ── Wishlist ──────────────────────────────────────────────────────────────
+    function toggleWishlist(btn, productId) {
+        const isNow = state.wishlist.has(productId)
+            ? (state.wishlist.delete(productId), false)
+            : (state.wishlist.add(productId), true);
+
+        btn.textContent = isNow ? '♥' : '♡';
+        btn.classList.toggle('active', isNow);
+        showToast('ok', isNow ? 'Saved to wishlist' : 'Removed from wishlist');
+    }
+
+    // ── Fetch helpers ─────────────────────────────────────────────────────────
+    async function apiFetch(url) {
+        const res = await fetch(url, {credentials: 'include'});
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return res.json();
+    }
+
+    // ── Load products (SPA) ───────────────────────────────────────────────────
+    async function loadProducts(pushHistory = true) {
+        const grid = document.getElementById('productsGrid');
+        const errBanner = document.getElementById('errorBanner');
+        const ssrPagination = document.getElementById('ssrPagination');
+        const jsPagination = document.getElementById('jsPagination');
+
+        errBanner.classList.remove('visible');
+        renderSkeletons(grid, 8);
+
+        try {
+            let url;
+            const params = new URLSearchParams({
+                page: state.page,
+                size: state.size,
+                ...(state.sort ? {sort: state.sort} : {}),
+            });
+
+            if (state.categoryId) {
+                url = `${API}/products/category/${state.categoryId}?${params}`;
+            } else {
+                url = `${API}/products?${params}`;
+            }
+
+            /** @type {{ content: ProductDto[], page: number, size: number,
+             *            totalElements: number, totalPages: number,
+             *            first: boolean, last: boolean }} */
+            const data = await apiFetch(url);
+
+            renderProducts(grid, data.content);
+            renderPagination(jsPagination, data);
+
+            // Hide SSR pagination, show JS one
+            if (ssrPagination) ssrPagination.style.display = 'none';
+            jsPagination.style.display = data.totalPages > 1 ? 'flex' : 'none';
+
+            // Update count
+            document.getElementById('countShowing').textContent =
+                `${data.content.length} of ${data.totalElements}`;
+
+            // Update hero stat
+            const statEl = document.getElementById('statProducts');
+            if (statEl) statEl.innerHTML = `<span>${data.totalElements}</span>`;
+
+            if (pushHistory) {
+                const urlState = new URL(window.location);
+                urlState.searchParams.set('page', state.page);
+                urlState.searchParams.set('size', state.size);
+                if (state.sort) urlState.searchParams.set('sort', state.sort);
+                if (state.categoryId) urlState.searchParams.set('categoryId', state.categoryId);
+                history.pushState(state, '', urlState);
+            }
+
+        } catch (err) {
+            errBanner.classList.add('visible');
+            document.getElementById('errorMsg').textContent =
+                `Failed to load products: ${err.message}`;
+            grid.innerHTML = `<div class="empty-state">
+            <div class="empty-state__icon">⚠</div>
+            <div class="empty-state__title">Something went wrong</div>
+            <div class="empty-state__sub">${err.message}</div>
+        </div>`;
+        }
+    }
+
+    // ── Load categories (SPA fallback when not server-rendered) ───────────────
+    async function loadCategories() {
+        const catList = document.getElementById('catList');
+        // Only fetch if the list only has the "All Products" button (Thymeleaf gave nothing)
+        if (catList.querySelectorAll('[data-cat-id]:not([data-cat-id=""])').length > 0) return;
+
+        try {
+            /** @type {Array<{id: string, name: string}>} */
+            const cats = await apiFetch(`${API}/categories`);
+
+            cats.forEach(cat => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                <button class="cat-item" data-cat-id="${cat.id}"
+                        onclick="selectCategory(this, '${cat.id}', '${escHtml(cat.name)}')"
+                        aria-pressed="false">
+                    <span class="cat-item__name">${escHtml(cat.name)}</span>
+                    <span class="cat-item__dot" aria-hidden="true"></span>
+                </button>`;
+                catList.appendChild(li);
+            });
+
+            const statCat = document.getElementById('statCategories');
+            if (statCat) statCat.innerHTML = `<span>${cats.length}</span>`;
+
+        } catch (err) {
+            console.warn('[astro] Could not load categories:', err.message);
+        }
+    }
+
+    // ── Render helpers ────────────────────────────────────────────────────────
+    function renderProducts(grid, products) {
+        if (!products || products.length === 0) {
+            grid.innerHTML = `<div class="empty-state" role="listitem">
+            <div class="empty-state__icon">🛸</div>
+            <div class="empty-state__title">No products found</div>
+            <div class="empty-state__sub">Try a different category or clear your filters.</div>
+            <button class="btn btn--ghost btn--sm" onclick="clearFilters()" style="margin-top:12px">
+                Clear filters
+            </button>
+        </div>`;
+            return;
+        }
+
+        grid.innerHTML = products.map(p => {
+            const imgHtml = (p.imageUrls && p.imageUrls.length > 0)
+                ? `<img class="pcard__img" src="${escAttr(p.imageUrls[0])}" alt="${escAttr(p.name)}" loading="lazy" />
+               ${p.imageUrls.length > 1 ? `<span class="pcard__img-count">${p.imageUrls.length} photos</span>` : ''}`
+                : `<div class="pcard__img-placeholder">📦</div>`;
+
+            return `
+        <article class="pcard reveal" data-product-id="${p.id}" role="listitem">
+            <div class="pcard__img-wrap">
+                ${imgHtml}
+                <div class="pcard__cat-chip">
+                    <span class="chip chip--slate">${escHtml(p.categoryName || '')}</span>
+                </div>
+                <div class="pcard__wishlist">
+                    <button class="btn--icon ${state.wishlist.has(p.id) ? 'active' : ''}"
+                            aria-label="Add to wishlist"
+                            onclick="toggleWishlist(this, '${p.id}')">
+                        ${state.wishlist.has(p.id) ? '♥' : '♡'}
+                    </button>
+                </div>
+            </div>
+            <div class="pcard__body">
+                <h2 class="pcard__name">${escHtml(p.name)}</h2>
+                <p class="pcard__desc">${escHtml(p.description || '')}</p>
+                <div class="pcard__footer">
+                    <div class="pcard__price">
+                        <sup>$</sup>${formatPrice(p.price)}
+                    </div>
+                    <button class="pcard__add"
+                            onclick="addToCart(this, '${p.id}', '${escAttr(p.name)}', ${p.price})"
+                            aria-label="Add ${escAttr(p.name)} to cart">
+                        + Add
+                    </button>
+                </div>
+                <a class="pcard__detail-link" href="javascript:void(0)"
+                   onclick="openDrawer('${p.id}')">
+                    View details →
+                </a>
+            </div>
+        </article>`;
+        }).join('');
+
+        // Scroll reveal
+        requestAnimationFrame(() => {
+            grid.querySelectorAll('.reveal').forEach((el, i) => {
+                el.style.cssText = 'opacity:0;transform:translateY(20px)';
+                setTimeout(() => {
+                    el.style.cssText = 'opacity:1;transform:none;transition:opacity .4s ease,transform .4s ease';
+                }, i * 45);
+            });
+        });
+    }
+
+    function renderSkeletons(grid, count) {
+        grid.innerHTML = Array.from({length: count}, () => `
+        <div class="pcard--skeleton" aria-hidden="true">
+            <div class="skel-block sk-img"></div>
+            <div class="sk-body">
+                <div class="skel-block sk-name"></div>
+                <div class="skel-block sk-desc"></div>
+                <div class="skel-block sk-desc2"></div>
+                <div class="skel-block sk-foot"></div>
+            </div>
+        </div>`).join('');
+    }
+
+    function renderPagination(nav, data) {
+        const {page, totalPages, first, last} = data;
+        if (totalPages <= 1) {
+            nav.innerHTML = '';
+            return;
+        }
+
+        // Show at most 7 pages with ellipsis
+        const pages = [];
+        for (let i = 0; i < totalPages; i++) {
+            if (i === 0 || i === totalPages - 1 || (i >= page - 2 && i <= page + 2)) {
+                pages.push(i);
+            } else if (pages[pages.length - 1] !== '…') {
+                pages.push('…');
+            }
+        }
+
+        nav.innerHTML = `
+        <button class="page-btn" onclick="loadPage(${page - 1})"
+                ${first ? 'disabled' : ''} aria-label="Previous page">←</button>
+        ${pages.map(p =>
+            p === '…'
+                ? `<span class="page-info">…</span>`
+                : `<button class="page-btn ${p === page ? 'active' : ''}"
+                           onclick="loadPage(${p})"
+                           aria-label="Page ${p + 1}"
+                           ${p === page ? 'aria-current="page"' : ''}>${p + 1}</button>`
+        ).join('')}
+        <button class="page-btn" onclick="loadPage(${page + 1})"
+                ${last ? 'disabled' : ''} aria-label="Next page">→</button>
+        <span class="page-info">${page + 1} / ${totalPages} · ${data.totalElements} items</span>`;
+    }
+
+    // ── Navigation actions ────────────────────────────────────────────────────
+    function selectCategory(btn, catId, catName) {
+        document.querySelectorAll('.cat-item').forEach(el => {
+            el.classList.remove('active');
+            el.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+
+        state.categoryId = catId || null;
+        state.categoryName = catName;
+        state.page = 0;
+        document.getElementById('clearFiltersBtn').style.display = catId ? '' : 'none';
+        loadProducts();
+    }
+
+    function applySort(val) {
+        state.sort = val;
+        state.page = 0;
+        loadProducts();
+    }
+
+    function applySize(val) {
+        state.size = parseInt(val);
+        state.page = 0;
+        loadProducts();
+    }
+
+    function loadPage(p) {
+        state.page = p;
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        loadProducts();
+    }
+
+    function clearFilters() {
+        state.categoryId = null;
+        state.categoryName = 'All Products';
+        state.sort = '';
+        state.searchQuery = '';
+        state.page = 0;
+        document.getElementById('searchInput').value = '';
+        document.getElementById('sortSelect').value = '';
+        document.getElementById('clearFiltersBtn').style.display = 'none';
+        document.querySelectorAll('.cat-item').forEach((el, i) => {
+            el.classList.toggle('active', i === 0);
+            el.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+        });
+        loadProducts();
+    }
+
+    function retryLoad() {
+        loadProducts();
+    }
+
+    // ── View toggle ───────────────────────────────────────────────────────────
+    function setView(v) {
+        state.view = v;
+        const grid = document.getElementById('productsGrid');
+        grid.classList.toggle('list-view', v === 'list');
+        document.getElementById('gridViewBtn').classList.toggle('active', v === 'grid');
+        document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
+        document.getElementById('gridViewBtn').setAttribute('aria-pressed', String(v === 'grid'));
+        document.getElementById('listViewBtn').setAttribute('aria-pressed', String(v === 'list'));
+    }
+
+    // ── Product detail drawer ─────────────────────────────────────────────────
+    async function openDrawer(productId) {
+        const overlay = document.getElementById('drawerOverlay');
+        const drawer = document.getElementById('productDrawer');
+        const body = document.getElementById('drawerBody');
+        const title = document.getElementById('drawerTitle');
+
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        body.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px;padding:8px 0">
+        <div class="skel-block" style="height:220px;border-radius:var(--r-md)"></div>
+        <div class="skel-block" style="height:20px;width:60%"></div>
+        <div class="skel-block" style="height:14px;width:80%"></div>
+        <div class="skel-block" style="height:14px;width:65%"></div>
+        <div class="skel-block" style="height:52px;margin-top:12px"></div>
+    </div>`;
+
+        try {
+            /** @type {ProductDto} */
+            const p = await apiFetch(`${API}/products/${productId}`);
+            title.textContent = p.name;
+
+            const hasImgs = p.imageUrls && p.imageUrls.length > 0;
+            const mainImg = hasImgs
+                ? `<img id="drawerMainImg" class="drawer__main-img" src="${escAttr(p.imageUrls[0])}" alt="${escAttr(p.name)}" />`
+                : `<div class="drawer__main-placeholder">📦</div>`;
+
+            const thumbsHtml = hasImgs && p.imageUrls.length > 1
+                ? `<div class="drawer__thumbs">
+                ${p.imageUrls.map((url, i) => `
+                    <img class="drawer__thumb ${i === 0 ? 'active' : ''}"
+                         src="${escAttr(url)}" alt="Image ${i + 1}"
+                         onclick="switchDrawerImg(this, '${escAttr(url)}')" />`
+                ).join('')}
+              </div>`
+                : '';
+
+            body.innerHTML = `
+            <div class="drawer__gallery">
+                ${mainImg}
+                ${thumbsHtml}
+            </div>
+            <div>
+                <div class="drawer__cat">
+                    <span class="chip chip--teal">${escHtml(p.categoryName || '')}</span>
+                </div>
+                <h2 class="drawer__name">${escHtml(p.name)}</h2>
+                <p class="drawer__desc">${escHtml(p.description || 'No description available.')}</p>
+                <div class="drawer__price-row">
+                    <div>
+                        <div class="drawer__price-label">Price</div>
+                        <div class="drawer__price-val">$${formatPrice(p.price)}</div>
+                    </div>
+                    <span class="chip chip--teal">In Stock</span>
+                </div>
+                <div class="drawer__actions">
+                    <button class="btn btn--teal drawer__add"
+                            onclick="addToCart(this, '${p.id}', '${escAttr(p.name)}', ${p.price}); closeDrawer();">
+                        🛒 Add to Cart
+                    </button>
+                    <button class="btn btn--ghost btn--icon"
+                            onclick="toggleWishlist(this, '${p.id}')" aria-label="Wishlist">
+                        ${state.wishlist.has(p.id) ? '♥' : '♡'}
+                    </button>
+                </div>
+            </div>`;
+        } catch (err) {
+            body.innerHTML = `<div class="empty-state">
+            <div class="empty-state__icon">⚠</div>
+            <div class="empty-state__title">Could not load product</div>
+            <div class="empty-state__sub">${err.message}</div>
+        </div>`;
+        }
+    }
+
+    function closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('open');
+        document.getElementById('productDrawer').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    function switchDrawerImg(thumb, url) {
+        document.querySelectorAll('.drawer__thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        const main = document.getElementById('drawerMainImg');
+        if (main) main.src = url;
+    }
+
+    // ── Search (debounced) ────────────────────────────────────────────────────
+    let _searchTimer;
+    document.getElementById('searchInput').addEventListener('input', e => {
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => {
+            state.searchQuery = e.target.value.trim();
+            state.page = 0;
+            // If the backend has a search endpoint add it here; otherwise filter client-side
+            loadProducts();
+        }, 380);
+    });
+
+    // ── Keyboard shortcuts ────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeDrawer();
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+    });
+
+    // ── Browser back/forward ──────────────────────────────────────────────────
+    window.addEventListener('popstate', e => {
+        if (e.state) {
+            Object.assign(state, e.state);
+            loadProducts(false);
+        }
+    });
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(type, message) {
+        const root = document.getElementById('toastRoot');
+        const el = document.createElement('div');
+        el.className = `toast toast--${type}`;
+        el.innerHTML = `<span class="toast__icon">${type === 'ok' ? '✓' : '⚠'}</span><span>${escHtml(message)}</span>`;
+        root.appendChild(el);
+        setTimeout(() => el.remove(), 3100);
+    }
+
+    // ── Utilities ─────────────────────────────────────────────────────────────
+    function escHtml(s) {
+        return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escAttr(s) {
+        return String(s ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatPrice(v) {
+        return Number(v).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    (async function init() {
+        // Read URL params on load (e.g. back navigation, direct link)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('page')) state.page = parseInt(params.get('page'));
+        if (params.get('size')) state.size = parseInt(params.get('size'));
+        if (params.get('sort')) state.sort = params.get('sort');
+        if (params.get('categoryId')) state.categoryId = params.get('categoryId');
+
+        // Only take over from Thymeleaf if JS is running (progressive enhancement)
+        // If Thymeleaf already rendered products, we still set up categories and
+        // let JS handle subsequent interactions without re-rendering the initial page.
+        const ssrHasProducts = document.querySelectorAll('.pcard').length > 0;
+
+        await loadCategories();
+
+        if (!ssrHasProducts) {
+            // No server-rendered products — full SPA mode
+            await loadProducts(false);
+        } else {
+            // SSR rendered; wire up JS pagination and update count from Thymeleaf
+            const showing = document.querySelectorAll('.pcard').length;
+            document.getElementById('countShowing').textContent = showing;
+        }
+
+        // Pre-warm CSRF token (using csrf.js)
+        if (typeof CSRF !== 'undefined') {
+            CSRF.loadCsrfToken().catch(() => {
+            });
+        }
+    })();
+
+    /*]]>*/
+</script>
 
 </body>
 </html>

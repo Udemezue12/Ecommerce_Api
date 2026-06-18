@@ -2,13 +2,11 @@ package com.uchechukwu.store.controllers;
 
 import com.uchechukwu.store.dtos.response.CsrfResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.WebUtils;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,33 +31,5 @@ public class CsrfController {
         );
     }
 
-    @GetMapping("/csrf/custom")
-    public ResponseEntity<CsrfResponse> csrf(
-            HttpServletRequest request,
-            CsrfToken token) {
-
-        var cookie =
-                WebUtils.getCookie(
-                        request,
-                        "XSRF-TOKEN");
-
-        System.out.println(
-                "Cookie = "
-                        + (cookie != null
-                        ? cookie.getValue()
-                        : null));
-
-        System.out.println(
-                "Token = "
-                        + token.getToken());
-
-        return ResponseEntity.ok(
-                new CsrfResponse(
-                        token.getToken(),
-                        token.getHeaderName(),
-                        token.getParameterName()
-                )
-        );
-    }
-
+    
 }

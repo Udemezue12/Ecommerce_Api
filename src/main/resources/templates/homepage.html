@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Astro Stores — Commerce API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap"
+          rel="stylesheet"/>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --void: #09090f;
+            --deep: #12121e;
+            --surface: #1a1a2e;
+            --border: #2a2a44;
+            --star: #c8b6ff;
+            --nova: #7c5cfc;
+            --nebula: #4f3bbd;
+            --pulse: #ff6b6b;
+            --text: #e8e4f4;
+            --muted: #8884a8;
+            --glow: rgba(124, 92, 252, 0.18);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--void);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── STARFIELD ── */
+        .starfield {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124, 92, 252, 0.12) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 80% 80%, rgba(79, 59, 189, 0.08) 0%, transparent 60%);
+        }
+
+        .starfield::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+            radial-gradient(1px 1px at 38% 6%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+            radial-gradient(1px 1px at 67% 22%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+            radial-gradient(1px 1px at 84% 9%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+            radial-gradient(1px 1px at 5% 55%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+            radial-gradient(1px 1px at 91% 44%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+            radial-gradient(1px 1px at 22% 78%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+            radial-gradient(1px 1px at 58% 88%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 73% 64%, rgba(200, 182, 255, 0.6) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 31% 42%, rgba(200, 182, 255, 0.5) 0%, transparent 100%),
+            radial-gradient(1px 1px at 47% 51%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+            radial-gradient(1px 1px at 16% 33%, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(1.5rem, 5vw, 4rem);
+            height: 64px;
+            background: rgba(9, 9, 15, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-logo {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--nova), var(--pulse));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+
+        .nav-wordmark {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+        }
+
+        .nav-badge {
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--star);
+            padding: 7px 18px;
+            border: 1px solid rgba(124, 92, 252, 0.4);
+            border-radius: 6px;
+            background: rgba(124, 92, 252, 0.08);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-cta:hover {
+            background: rgba(124, 92, 252, 0.2);
+            border-color: var(--nova);
+            color: #fff;
+        }
+
+        .nav-cta svg {
+            flex-shrink: 0;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: clamp(6rem, 12vw, 10rem) clamp(1.5rem, 5vw, 4rem) clamp(4rem, 8vw, 6rem);
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--nova);
+            margin-bottom: 2rem;
+        }
+
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: '';
+            display: block;
+            width: 28px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--nova));
+        }
+
+        .hero-eyebrow::after {
+            transform: scaleX(-1);
+        }
+
+        .hero-headline {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .hero-headline span {
+            display: block;
+            background: linear-gradient(120deg, var(--star) 0%, var(--nova) 50%, var(--pulse) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            color: var(--muted);
+            max-width: 520px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--nova), var(--nebula));
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 0 1px rgba(124, 92, 252, 0.3), 0 8px 32px rgba(124, 92, 252, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 1px rgba(124, 92, 252, 0.5), 0 12px 40px rgba(124, 92, 252, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            font-size: 0.88rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: var(--muted);
+        }
+
+        /* orbit graphic */
+        .hero-orbit {
+            position: absolute;
+            width: min(700px, 90vw);
+            height: min(700px, 90vw);
+            border-radius: 50%;
+            border: 1px solid rgba(124, 92, 252, 0.08);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: orbitSpin 40s linear infinite;
+        }
+
+        .hero-orbit::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--nova);
+            top: -3px;
+            left: 50%;
+            box-shadow: 0 0 12px var(--nova);
+        }
+
+        .hero-orbit-2 {
+            width: min(500px, 70vw);
+            height: min(500px, 70vw);
+            border-color: rgba(79, 59, 189, 0.07);
+            animation-duration: 28s;
+            animation-direction: reverse;
+        }
+
+        .hero-orbit-2::after {
+            background: var(--pulse);
+            box-shadow: 0 0 10px var(--pulse);
+        }
+
+        @keyframes orbitSpin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0 clamp(1.5rem, 5vw, 4rem);
+        }
+
+        /* ── WHAT IS SECTION ── */
+        .section {
+            padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 5vw, 4rem);
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--nova);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-body {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 580px;
+            line-height: 1.8;
+        }
+
+        /* two-col */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(2rem, 5vw, 5rem);
+            align-items: center;
+        }
+
+        @media (max-width: 720px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── CAPABILITIES ── */
+        .caps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .cap-card {
+            background: var(--deep);
+            padding: 2rem 1.75rem;
+            transition: background 0.2s ease;
+        }
+
+        .cap-card:hover {
+            background: var(--surface);
+        }
+
+        .cap-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--glow);
+            border: 1px solid rgba(124, 92, 252, 0.2);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+
+        .cap-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            margin-bottom: 0.5rem;
+        }
+
+        .cap-desc {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ── API SNIPPET ── */
+        .snippet-wrap {
+            background: var(--deep);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .snippet-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-r {
+            background: #ff5f56;
+        }
+
+        .dot-y {
+            background: #ffbd2e;
+        }
+
+        .dot-g {
+            background: #27c93f;
+        }
+
+        .snippet-title {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        .snippet-body {
+            padding: 1.5rem;
+            font-size: 0.82rem;
+            line-height: 1.9;
+            font-family: 'Courier New', monospace;
+        }
+
+        .t-c {
+            color: var(--muted);
+        }
+
+        .t-k {
+            color: var(--star);
+        }
+
+        .t-s {
+            color: #98e89f;
+        }
+
+        .t-n {
+            color: var(--pulse);
+        }
+
+        .t-v {
+            color: #ffd166;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent);
+        }
+
+        .step {
+            padding: 0 1.5rem 2rem;
+            position: relative;
+        }
+
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--deep);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--nova);
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.2s ease;
+        }
+
+        .step:hover .step-num {
+            background: var(--glow);
+            border-color: var(--nova);
+            box-shadow: 0 0 20px rgba(124, 92, 252, 0.25);
+        }
+
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-desc {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ── CTA BAND ── */
+        .cta-band {
+            margin: 0 clamp(1.5rem, 5vw, 4rem);
+            border-radius: 16px;
+            padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+            background: linear-gradient(135deg, rgba(124, 92, 252, 0.12) 0%, rgba(79, 59, 189, 0.06) 100%);
+            border: 1px solid rgba(124, 92, 252, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-text .label {
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--nova);
+            margin-bottom: 0.6rem;
+        }
+
+        .cta-text h2 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .cta-text p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-top: 0.75rem;
+            max-width: 400px;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem clamp(1.5rem, 5vw, 4rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-brand {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--star);
+        }
+
+        .footer-copy {
+            font-size: 0.75rem;
+            color: var(--border);
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--void);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-orbit, .hero-orbit-2 {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="starfield" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav>
+    <a class="nav-brand" href="#">
+        <div class="nav-logo">A⭑</div>
+        <span class="nav-wordmark">Astro Stores</span>
+        <span class="nav-badge">API v1</span>
+    </a>
+    <a class="nav-cta" href="swagger-ui/index.html#/">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        View API Docs
+    </a>
+</nav>
+
+<main>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-orbit" aria-hidden="true"></div>
+        <div class="hero-orbit hero-orbit-2" aria-hidden="true"></div>
+
+        <p class="hero-eyebrow">Commerce Infrastructure</p>
+        <h1 class="hero-headline">
+            Build stores<br>
+            <span>without limits</span>
+        </h1>
+        <p class="hero-sub">
+            Astro Stores is a headless e-commerce API built for developers who want full control — from product catalog
+            to checkout — with zero platform lock-in.
+        </p>
+        <div class="hero-actions">
+            <a class="btn-primary" href="swagger-ui/index.html#/">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                OpenAPI Reference
+            </a>
+            <a class="btn-secondary" href="#what">
+                Learn more
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- WHAT IS IT -->
+    <section class="section" id="what">
+        <div class="two-col">
+            <div>
+                <p class="section-label">What is it</p>
+                <h2 class="section-title">A complete commerce engine, delivered over REST</h2>
+                <p class="section-body">
+                    Astro Stores provides every primitive you need to run an online store — products, inventory, carts,
+                    orders, customers, and payments — through a clean, predictable REST API.<br><br>
+                    Whether you're building a storefront from scratch, migrating off a monolithic platform, or wiring
+                    commerce into an existing app, the API fits around your stack rather than the other way around.
+                </p>
+            </div>
+            <div class="snippet-wrap">
+                <div class="snippet-bar">
+                    <div class="dot dot-r"></div>
+                    <div class="dot dot-y"></div>
+                    <div class="dot dot-g"></div>
+                    <span class="snippet-title">Astro Stores REST API</span>
+                </div>
+                <div class="snippet-body">
+                    <span class="t-c"># Base URL</span><br>
+                    <span class="t-k">https://</span><span class="t-s">api.astrostores.io</span><span
+                        class="t-k">/v1</span><br><br>
+                    <span class="t-c"># Authenticate with a bearer token</span><br>
+                    <span class="t-k">Authorization: Bearer</span> <span class="t-n">&#123;your_api_key&#125;</span><br><br>
+                    <span class="t-c"># Resources available</span><br>
+                    <span class="t-k">GET</span> <span class="t-v">/products</span><br>
+                    <span class="t-k">POST</span> <span class="t-v">/carts</span><br>
+                    <span class="t-k">POST</span> <span class="t-v">/orders</span><br>
+                    <span class="t-k">GET</span> <span class="t-v">/customers/:id</span><br>
+                    <span class="t-k">GET</span> <span class="t-v">/inventory</span><br>
+                    <span class="t-k">POST</span> <span class="t-v">/payments/checkout</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- CAPABILITIES -->
+    <section class="section">
+        <p class="section-label">Capabilities</p>
+        <h2 class="section-title" style="margin-bottom: 2.5rem;">Everything the API covers</h2>
+        <div class="caps-grid">
+            <div class="cap-card">
+                <div class="cap-icon">🛍</div>
+                <p class="cap-title">Product Catalog</p>
+                <p class="cap-desc">Create and manage products with variants, attributes, media, pricing, and
+                    categories. Supports digital and physical goods.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">📦</div>
+                <p class="cap-title">Inventory</p>
+                <p class="cap-desc">Track stock levels per variant and location. Reservation hooks keep inventory
+                    accurate during checkout.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">🛒</div>
+                <p class="cap-title">Cart & Checkout</p>
+                <p class="cap-desc">Persistent carts tied to sessions or customers. Line item management, discount
+                    codes, and shipping quotes.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">🧾</div>
+                <p class="cap-title">Orders</p>
+                <p class="cap-desc">Full order lifecycle — placed, fulfilled, shipped, returned. Webhooks fire at every
+                    state transition.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">👤</div>
+                <p class="cap-title">Customers</p>
+                <p class="cap-desc">Account creation, address books, order history. Supports guest checkout alongside
+                    registered flows.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">💳</div>
+                <p class="cap-title">Payments</p>
+                <p class="cap-desc">Provider-agnostic payment intents. Bring your own Stripe, Paystack, or Flutterwave
+                    keys — we stay out of the way.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+        <p class="section-label">How it works</p>
+        <h2 class="section-title" style="margin-bottom: 3rem;">From API key to live store</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <p class="step-title">Generate your API key</p>
+                <p class="step-desc">Create a store workspace and get a scoped API key. Separate keys for test and
+                    production environments.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <p class="step-title">Explore in the playground</p>
+                <p class="step-desc">Use the interactive OpenAPI docs to send live requests against a sandbox store — no
+                    setup required.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <p class="step-title">Build your storefront</p>
+                <p class="step-desc">Call the REST endpoints from any language, framework, or edge runtime. JSON in,
+                    JSON out.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">04</div>
+                <p class="step-title">Go live</p>
+                <p class="step-desc">Swap to a production key. Wire up webhooks for order events, inventory alerts, and
+                    payment confirmations.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <div class="cta-band" id="docs">
+        <div class="cta-text">
+            <p class="label">Interactive Docs</p>
+            <h2>Read the full API reference</h2>
+            <p>Every endpoint, parameter, request body, and response schema — live-testable straight from your
+                browser.</p>
+        </div>
+        <a class="btn-primary" href="swagger-ui/index.html#/" style="flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Open OpenAPI Docs
+        </a>
+    </div>
+
+</main>
+
+<footer>
+    <span class="footer-brand">Astro Stores</span>
+    <div class="footer-links">
+        <a href="swagger-ui/index.html#/">API Reference</a>
+        <a href="#">Changelog</a>
+        <a href="#">Status</a>
+    </div>
+    <span class="footer-copy">© 2026 Astro Stores</span>
+</footer>
+
+</body>
+</html>

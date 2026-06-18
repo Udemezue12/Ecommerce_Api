@@ -25,6 +25,14 @@ public class User {
 
     @Column(name = "name")
     private String name;
+    @Column(name = "suspended")
+    private boolean suspended = false;
+    @Column(name = "deleted")
+    private boolean deleted = false;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+    @Column(name = "suspended_at")
+    private LocalDateTime suspendedAt;
 
     @Column(name = "email")
     private String email;

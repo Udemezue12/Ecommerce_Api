@@ -41,6 +41,16 @@ public class ProfileMapper {
 
     public static void deleteEntity(Profile profile) {
         profile.setDeleted(true);
+        profile.getUser().setDeleted(true);
+        profile.getUser().setDeletedAt(LocalDateTime.now());
         profile.setDeletedAt(LocalDateTime.now());
+    }
+
+    public static void suspendEntity(Profile profile) {
+        profile.setSuspended(true);
+        profile.getUser().setSuspended(true);
+        profile.getUser().setSuspendedAt(LocalDateTime.now());
+
+        profile.setSuspendedAt(LocalDateTime.now());
     }
 }

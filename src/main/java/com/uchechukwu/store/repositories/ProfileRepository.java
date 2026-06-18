@@ -1,6 +1,7 @@
 package com.uchechukwu.store.repositories;
 
 import com.uchechukwu.store.entities.Profile;
+import com.uchechukwu.store.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -40,4 +41,7 @@ public interface ProfileRepository extends JpaRepository<Profile, UUID> {
             LocalDateTime start,
             LocalDateTime end
     );
+
+    @EntityGraph(attributePaths = {"user"})
+    Optional<Profile> findByUserAndDeletedFalse(User user);
 }

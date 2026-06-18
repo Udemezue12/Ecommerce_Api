@@ -10,6 +10,9 @@ import com.uchechukwu.store.dtos.response.ProfileResponse;
 import com.uchechukwu.store.entities.Profile;
 import com.uchechukwu.store.entities.User;
 import com.uchechukwu.store.events.SingleImageDeleteEvent;
+import com.uchechukwu.store.exceptions.AccountDeletedException;
+import com.uchechukwu.store.exceptions.AccountSuspendedException;
+import com.uchechukwu.store.exceptions.DuplicateResourceException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.mappers.ProfileMapper;
 import com.uchechukwu.store.repositories.ProfileRepository;
@@ -40,6 +43,21 @@ public class ProfileService {
             "all-profiles", "all-active-profiles"})
     public ResponseEntity<ProfileResponse> createProfile(ProfileRequest request) {
         var user = getCurrentUser.getCurrentUser();
+        if (user.isDeleted()) {
+            throw new AccountDeletedException(
+                    "Account has been deleted");
+        }
+
+        if (user.isSuspended()) {
+            throw new AccountSuspendedException(
+                    "Account has been suspended");
+        }
+
+        profileRepo.findByUserAndDeletedFalse(user)
+                .ifPresent(profile -> {
+                    throw new DuplicateResourceException(
+                            "Profile already exists");
+                });
 
 
         var fileHash = computeFileHash.computeFileHashAsync(request.imageUrl());
@@ -51,7 +69,6 @@ public class ProfileService {
     }
 
     @Transactional
-
     @CustomCacheEvict(cacheNames = {
             "all-profiles", "all-active-profiles", "single-profile"})
     public ResponseEntity<ProfileResponse> updateProfile(ProfileRequest request) {
@@ -129,6 +146,16 @@ public class ProfileService {
         ProfileMapper.deleteEntity(profile);
         profileRepo.save(profile);
         return ApiResponseBuilder.deletedResponse("Profile Deleted");
+    }
+
+    @Transactional
+    @CustomCacheEvict(cacheNames = {
+            "all-profiles", "all-active-profiles", "single-profile"})
+    public ResponseEntity<ApiResponse<Void>> adminSuspendProfile(UUID profileId, UUID userId) {
+        var profile = getAdminActiveProfile(profileId, userId);
+        ProfileMapper.suspendEntity(profile);
+        profileRepo.save(profile);
+        return ApiResponseBuilder.deletedResponse("Profile Suspended");
     }
 
     @Transactional(readOnly = true)
