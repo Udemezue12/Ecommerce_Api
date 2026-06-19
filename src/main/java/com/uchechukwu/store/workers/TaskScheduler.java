@@ -3,14 +3,14 @@ package com.uchechukwu.store.workers;
 import com.uchechukwu.store.configProperties.PingerProperties;
 import com.uchechukwu.store.events.MultipleImagesDeleteEvent;
 import com.uchechukwu.store.events.PaymentSuccessEvent;
-
 import com.uchechukwu.store.events.SingleImageDeleteEvent;
 import com.uchechukwu.store.tasks.*;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.scheduling.cron.Cron;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -25,8 +25,8 @@ public class TaskScheduler {
     private final PingUrlTask pingUrlTask;
     private final PingerProperties properties;
 
-    @PostConstruct
-    public void scheduleJobs() {
+    @EventListener(ApplicationReadyEvent.class)
+    public void deleteTokens() {
         jobScheduler.scheduleRecurrently(
                 "revoked-token-cleanup",
                 Cron.weekly(),
@@ -34,7 +34,7 @@ public class TaskScheduler {
                 cleanupToken::cleanupExpiredTokens);
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void cancelOrders() {
         jobScheduler.scheduleRecurrently(
                 "cancel-orders-that-are-pending",
@@ -44,7 +44,7 @@ public class TaskScheduler {
 
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void pingUrls() {
 
         properties.pingUrls().forEach(site ->
