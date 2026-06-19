@@ -148,6 +148,7 @@ public class ProfileService {
         return ApiResponseBuilder.deletedResponse("Profile Deleted");
     }
 
+
     @Transactional
     @CustomCacheEvict(cacheNames = {
             "all-profiles", "all-active-profiles", "single-profile"})

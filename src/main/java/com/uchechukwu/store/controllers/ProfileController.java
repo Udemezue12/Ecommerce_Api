@@ -36,10 +36,16 @@ public class ProfileController {
 
     }
 
-    @DeleteMapping("/admin/profile/{userId}/{profileId}/delete")
+    @PostMapping("/admin/profile/{userId}/{profileId}/delete")
     @RateLimit
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID userId, @PathVariable UUID profileId) {
         return profileService.adminDeleteProfile(profileId, userId);
+    }
+
+    @PostMapping("/admin/profile/{userId}/{profileId}/delete")
+    @RateLimit
+    public ResponseEntity<ApiResponse<Void>> suspendUser(@PathVariable UUID userId, @PathVariable UUID profileId) {
+        return profileService.adminSuspendProfile(profileId, userId);
     }
 
     @GetMapping("/profile/get")
