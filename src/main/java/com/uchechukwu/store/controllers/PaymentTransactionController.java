@@ -26,7 +26,7 @@ public class PaymentTransactionController {
 
     private final PaymentTransactionService paymentService;
 
-    @PostMapping("/{orderId}/checkout/order")
+    @PostMapping("/{orderId}/initialize-payment")
     @RateLimit(times = 4, seconds = 8)
     @Idempotent
     public ResponseEntity<PaymentInitializeResponse> startPayment(
