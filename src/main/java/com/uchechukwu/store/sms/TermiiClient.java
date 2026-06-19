@@ -1,6 +1,6 @@
 package com.uchechukwu.store.sms;
 
-import com.uchechukwu.store.config.NotificationProperties;
+import com.uchechukwu.store.configProperties.NotificationProperties;
 import com.uchechukwu.store.dtos.response.TermiiSmsResponse;
 import com.uchechukwu.store.exceptions.NotificationException;
 import lombok.RequiredArgsConstructor;

@@ -1,13 +1,11 @@
 package com.uchechukwu.store.workers;
 
+import com.uchechukwu.store.configProperties.PingerProperties;
 import com.uchechukwu.store.events.MultipleImagesDeleteEvent;
 import com.uchechukwu.store.events.PaymentSuccessEvent;
 
 import com.uchechukwu.store.events.SingleImageDeleteEvent;
-import com.uchechukwu.store.tasks.CancelPendingOrders;
-import com.uchechukwu.store.tasks.CloudinaryImageDeleteTasks;
-import com.uchechukwu.store.tasks.DeleteBlacklistedTokenTask;
-import com.uchechukwu.store.tasks.PaymentNotification;
+import com.uchechukwu.store.tasks.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.scheduling.JobScheduler;
@@ -24,6 +22,8 @@ public class TaskScheduler {
     private final PaymentNotification paymentNotification;
     private final CancelPendingOrders cancelPendingOrders;
     private final CloudinaryImageDeleteTasks deleteImages;
+    private final PingUrlTask pingUrlTask;
+    private final PingerProperties properties;
 
     @PostConstruct
     public void scheduleJobs() {
@@ -41,6 +41,27 @@ public class TaskScheduler {
                 Cron.daily(),
                 cancelPendingOrders::deletePendingOrder
         );
+
+    }
+
+    @PostConstruct
+    public void pingUrls() {
+
+        properties.pingUrls().forEach(site ->
+                jobScheduler.scheduleRecurrently(
+                        "ping-" + sanitize(site),
+                        "*/8 * * * *",
+                        () -> pingUrlTask.pingUrl(site)
+                )
+        );
+    }
+
+    private String sanitize(String url) {
+
+        return url
+                .replace("https://", "")
+                .replace("http://", "")
+                .replaceAll("[^a-zA-Z0-9]", "-");
 
     }
 

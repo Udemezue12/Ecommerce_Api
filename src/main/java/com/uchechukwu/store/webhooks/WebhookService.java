@@ -1,7 +1,7 @@
 package com.uchechukwu.store.webhooks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uchechukwu.store.config.PaymentPropertiesConfig;
+import com.uchechukwu.store.configProperties.PaymentPropertiesConfig;
 import com.uchechukwu.store.dtos.request.PaymentWebhookPayload;
 import com.uchechukwu.store.enums.PaymentMethod;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;

@@ -1,4 +1,4 @@
-package com.uchechukwu.store.config;
+package com.uchechukwu.store.configProperties;
 
 import lombok.Getter;
 import lombok.Setter;

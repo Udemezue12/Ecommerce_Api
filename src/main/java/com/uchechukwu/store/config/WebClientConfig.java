@@ -1,5 +1,6 @@
 package com.uchechukwu.store.config;
 
+import com.uchechukwu.store.configProperties.PaymentPropertiesConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    private final PaymentPropertiesConfig properties; 
+    private final PaymentPropertiesConfig properties;
 
     public WebClientConfig(PaymentPropertiesConfig properties) {
         this.properties = properties;
@@ -25,7 +26,7 @@ public class WebClientConfig {
         return buildClient("https://api.flutterwave.com/v3", properties.getFlutterwaveSecretKey());
     }
 
-    
+
     private WebClient buildClient(String baseUrl, String secretKey) {
         return WebClient.builder()
                 .baseUrl(baseUrl)

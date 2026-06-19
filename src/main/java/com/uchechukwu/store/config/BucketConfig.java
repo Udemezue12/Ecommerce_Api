@@ -1,6 +1,7 @@
 package com.uchechukwu.store.config;
 
 
+import com.uchechukwu.store.configProperties.RedisConfigurationProperties;
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;

@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCaching
 @ConfigurationPropertiesScan
 @EnableAsync
+//@EnableScheduling
 public class StoreApplication {
 
     public static void main(String[] args) {

@@ -1,17 +1,15 @@
 package com.uchechukwu.store.email.gmail;
 
-import java.nio.charset.StandardCharsets;
-
+import com.uchechukwu.store.configProperties.NotificationProperties;
+import com.uchechukwu.store.core.NotificationCircuitBreaker;
+import com.uchechukwu.store.exceptions.NotificationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-import com.uchechukwu.store.config.NotificationProperties;
-import com.uchechukwu.store.core.NotificationCircuitBreaker;
-import com.uchechukwu.store.exceptions.NotificationException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component

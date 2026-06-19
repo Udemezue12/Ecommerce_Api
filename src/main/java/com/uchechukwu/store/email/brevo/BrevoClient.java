@@ -1,6 +1,6 @@
 package com.uchechukwu.store.email.brevo;
 
-import com.uchechukwu.store.config.NotificationProperties;
+import com.uchechukwu.store.configProperties.NotificationProperties;
 import com.uchechukwu.store.core.NotificationCircuitBreaker;
 import com.uchechukwu.store.exceptions.NotificationException;
 import lombok.RequiredArgsConstructor;
