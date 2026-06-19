@@ -42,7 +42,7 @@ public class ProfileController {
         return profileService.adminDeleteProfile(profileId, userId);
     }
 
-    @PostMapping("/admin/profile/{userId}/{profileId}/delete")
+    @PostMapping("/admin/profile/{userId}/{profileId}/suspend")
     @RateLimit
     public ResponseEntity<ApiResponse<Void>> suspendUser(@PathVariable UUID userId, @PathVariable UUID profileId) {
         return profileService.adminSuspendProfile(profileId, userId);
