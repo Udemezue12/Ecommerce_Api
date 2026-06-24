@@ -10,6 +10,7 @@ spring:
 
   flyway:
     out-of-order: true
+
   jwt:
     secret: ${SECRET_KEY}
     expiration: ${EXPIRATION}
