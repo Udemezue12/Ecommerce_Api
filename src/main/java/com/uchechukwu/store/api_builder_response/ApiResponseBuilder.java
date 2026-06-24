@@ -1,4 +1,4 @@
-package com.uchechukwu.store.responses;
+package com.uchechukwu.store.api_builder_response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

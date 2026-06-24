@@ -1,5 +1,7 @@
 package com.uchechukwu.store.service;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.OtpRateLimit;
 import com.uchechukwu.store.dtos.request.LoginRequest;
 import com.uchechukwu.store.dtos.request.ResetPasswordRequest;
@@ -7,15 +9,13 @@ import com.uchechukwu.store.dtos.request.UserRequestDto;
 import com.uchechukwu.store.dtos.request.VerifyEmailRequest;
 import com.uchechukwu.store.dtos.response.TokenResponse;
 import com.uchechukwu.store.dtos.response.UserResponseDto;
+import com.uchechukwu.store.enums.JwtType;
 import com.uchechukwu.store.exceptions.BadRequestException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.jwt.Jwt;
 import com.uchechukwu.store.jwt.JwtResponseCookie;
-import com.uchechukwu.store.enums.JwtType;
 import com.uchechukwu.store.mappers.UserMapper;
 import com.uchechukwu.store.repositories.UserRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.tasks.SendVerifyAndPasswordResetEmail;
 import com.uchechukwu.store.validators.RequestValidators;
 import com.uchechukwu.store.verification.UserVerification;

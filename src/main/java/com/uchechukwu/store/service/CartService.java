@@ -1,5 +1,7 @@
 package com.uchechukwu.store.service;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.GetCurrentUser;
 import com.uchechukwu.store.dtos.request.AddItemToCartRequest;
 import com.uchechukwu.store.dtos.request.AllCartItemsRequest;
@@ -18,9 +20,6 @@ import com.uchechukwu.store.mappers.CartMapper;
 import com.uchechukwu.store.repositories.CartItemRepository;
 import com.uchechukwu.store.repositories.CartRepository;
 import com.uchechukwu.store.repositories.InventoryRepository;
-
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.validators.EntityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

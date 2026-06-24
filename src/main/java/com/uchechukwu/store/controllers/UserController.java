@@ -1,11 +1,11 @@
 package com.uchechukwu.store.controllers;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
 import com.uchechukwu.store.dtos.request.ChangePasswordRequestDto;
 import com.uchechukwu.store.dtos.request.UserPatchRequestDto;
 import com.uchechukwu.store.dtos.request.UserUpdateRequestDto;
 import com.uchechukwu.store.dtos.response.UserResponseDto;
 import com.uchechukwu.store.interfaces.UserSummary;
-import com.uchechukwu.store.responses.ApiResponse;
 import com.uchechukwu.store.service.UserService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;

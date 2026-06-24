@@ -1,5 +1,7 @@
 package com.uchechukwu.store.service;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.ComputeFileHash;
 import com.uchechukwu.store.core.GetCurrentUser;
 import com.uchechukwu.store.customCache.CustomCacheEvict;
@@ -16,8 +18,6 @@ import com.uchechukwu.store.exceptions.DuplicateResourceException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.mappers.ProfileMapper;
 import com.uchechukwu.store.repositories.ProfileRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.validators.ValidatedSortedData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;

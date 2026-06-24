@@ -17,6 +17,8 @@ public class NotificationProperties {
 
     private String brevoApiKey;
     private String brevoUrl;
+    private String brevoAppName;
+
 
     private String emailHost;
     private Integer emailPort;

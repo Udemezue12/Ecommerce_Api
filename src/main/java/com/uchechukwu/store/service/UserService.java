@@ -1,5 +1,7 @@
 package com.uchechukwu.store.service;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.GetCurrentUser;
 import com.uchechukwu.store.dtos.request.ChangePasswordRequestDto;
 import com.uchechukwu.store.dtos.request.UserPatchRequestDto;
@@ -8,8 +10,6 @@ import com.uchechukwu.store.dtos.response.UserResponseDto;
 import com.uchechukwu.store.interfaces.UserSummary;
 import com.uchechukwu.store.mappers.UserMapper;
 import com.uchechukwu.store.repositories.UserRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.sortingAndPaginating.SortAndPaginate;
 import com.uchechukwu.store.validators.EntityValidator;
 import com.uchechukwu.store.validators.RequestValidators;

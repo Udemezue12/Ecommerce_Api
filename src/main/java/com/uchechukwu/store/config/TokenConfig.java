@@ -1,8 +1,7 @@
 package com.uchechukwu.store.config;
 
+import com.uchechukwu.store.configProperties.AuthProperties;
 import com.uchechukwu.store.core.GetSecretKey;
-import com.uchechukwu.store.properties.AuthProperties;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,6 @@ public class TokenConfig {
     public SecretKey resetSecretKey() {
         return GetSecretKey.getKeys(properties.getResetSecretKey());
     }
-
 
 
 }

@@ -1,11 +1,11 @@
 package com.uchechukwu.store.controllers;
 
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.dtos.request.WishlistRequest;
 import com.uchechukwu.store.dtos.response.WishlistPageResponse;
 import com.uchechukwu.store.dtos.response.WishlistResponse;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.service.WishlistService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -3,10 +3,8 @@ package com.uchechukwu.store.email.brevo;
 import com.uchechukwu.store.configProperties.NotificationProperties;
 import com.uchechukwu.store.core.NotificationCircuitBreaker;
 import com.uchechukwu.store.exceptions.NotificationException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -15,33 +13,24 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+
 public class BrevoClient {
 
     private final NotificationProperties properties;
     private final NotificationCircuitBreaker breaker;
+    private final WebClient client;
 
-
-    private WebClient client() {
-
-        return WebClient.builder()
-                .baseUrl(properties.getBrevoUrl())
-                .defaultHeader(
-                        "api-key",
-                        properties.getBrevoApiKey())
-                .defaultHeader(
-                        HttpHeaders.CONTENT_TYPE,
-                        MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(
-                        HttpHeaders.ACCEPT,
-                        MediaType.APPLICATION_JSON_VALUE)
-                .build();
+    public BrevoClient(NotificationProperties properties, NotificationCircuitBreaker breaker, @Qualifier("brevoWebClient") WebClient client) {
+        this.properties = properties;
+        this.breaker = breaker;
+        this.client = client;
     }
 
-    private BrevoEmailResponse sendEmail(
+
+    private void sendEmail(
             BrevoEmailRequest request) {
 
-        var response = client()
+        var response = client
                 .post()
                 .uri("")
                 .bodyValue(request)
@@ -55,7 +44,6 @@ public class BrevoClient {
                     "Empty response from Brevo");
         }
 
-        return response;
     }
 
     public void sendBrevoEmail(
@@ -70,7 +58,7 @@ public class BrevoClient {
             var request = BrevoEmailRequest.builder()
                     .sender(
                             BrevoEmailRequest.Sender.builder()
-                                    .name("Support")
+                                    .name(properties.getBrevoAppName())
                                     .email(
                                             properties.getEmailUsername())
                                     .build())

@@ -1,4 +1,4 @@
-package com.uchechukwu.store.responses;
+package com.uchechukwu.store.dtos.response;
 
 import com.uchechukwu.store.enums.PaymentMethod;
 import com.uchechukwu.store.enums.PaymentStatus;

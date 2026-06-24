@@ -1,9 +1,9 @@
 package com.uchechukwu.store.verification;
 
 
+import com.uchechukwu.store.configProperties.AuthProperties;
 import com.uchechukwu.store.core.GetSecretKey;
 import com.uchechukwu.store.fintech.FintechConstant;
-import com.uchechukwu.store.properties.AuthProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

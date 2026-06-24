@@ -96,8 +96,10 @@ notification:
 
   brevo-api-key: ${BREVO_API_KEY}
   brevo-url: https://api.brevo.com/v3/smtp/email
+  brevo-app-name: ${BREV0_APP_NAME}
 
-  notification:
+
+
   email-host: smtp.gmail.com
   email-port: ${EMAIL_PORT:587}
   email-username: ${EMAIL_USERNAME}

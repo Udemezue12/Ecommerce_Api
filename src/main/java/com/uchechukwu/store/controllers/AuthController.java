@@ -1,12 +1,12 @@
 package com.uchechukwu.store.controllers;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
 import com.uchechukwu.store.dtos.request.LoginRequest;
 import com.uchechukwu.store.dtos.request.ResendVerificationRequest;
 import com.uchechukwu.store.dtos.request.UserRequestDto;
 import com.uchechukwu.store.dtos.request.VerifyEmailRequest;
 import com.uchechukwu.store.dtos.response.TokenResponse;
 import com.uchechukwu.store.dtos.response.UserResponseDto;
-import com.uchechukwu.store.responses.ApiResponse;
 import com.uchechukwu.store.service.AuthenticationService;
 import com.uchechukwu.store.service.UserService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;

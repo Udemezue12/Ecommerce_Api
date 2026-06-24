@@ -1,10 +1,10 @@
 package com.uchechukwu.store.controllers;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.dtos.request.CategoryRequest;
 import com.uchechukwu.store.dtos.request.CategoryUpdateRequest;
 import com.uchechukwu.store.dtos.response.CategoryDto;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.service.CategoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

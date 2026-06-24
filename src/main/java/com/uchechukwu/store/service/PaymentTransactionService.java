@@ -7,7 +7,7 @@ import com.uchechukwu.store.customCache.CustomCacheEvict;
 import com.uchechukwu.store.customCache.CustomCacheable;
 import com.uchechukwu.store.dtos.request.PaymentRefundRequest;
 import com.uchechukwu.store.dtos.request.PaymentRequest;
-
+import com.uchechukwu.store.dtos.response.PaymentTransactionResponse;
 import com.uchechukwu.store.dtos.response.PaymentTransactionsPageResponse;
 import com.uchechukwu.store.entities.PaymentTransaction;
 import com.uchechukwu.store.enums.OrderStatus;
@@ -21,13 +21,11 @@ import com.uchechukwu.store.fintech.africanGateways.PaymentVerifyResponse;
 import com.uchechukwu.store.mappers.PaymentTransactionMapper;
 import com.uchechukwu.store.repositories.OrderRepository;
 import com.uchechukwu.store.repositories.PaymentTransactionRepository;
-import com.uchechukwu.store.responses.PaymentTransactionResponse;
 import com.uchechukwu.store.validators.EntityValidator;
 import com.uchechukwu.store.validators.ValidatedSortedData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -287,15 +285,17 @@ public class PaymentTransactionService {
                 result.isLast()
         );
     }
+
     @Transactional(readOnly = true)
     @CustomCacheable(
             value = "userTransactions",
             key = "#user' + #transactionId"
     )
-    public PaymentTransactionResponse getUserTransaction(UUID transactionId){
+    public PaymentTransactionResponse getUserTransaction(UUID transactionId) {
         return paymentRepo.findByIdAndUserId(transactionId, getCurrentUser.getCurrentUserId()).map(PaymentTransactionMapper::toResponseDto).orElseThrow(() -> new ResourceNotFoundException("No payment transaction found"));
 
     }
+
     @Transactional(readOnly = true)
     @CustomCacheable(
             value = "adminTransactions",
@@ -341,7 +341,7 @@ public class PaymentTransactionService {
             key = "#vendorId + '-' + #page + '-' + #size"
     )
     public PaymentTransactionsPageResponse getTransactionsForProductOwner(
-             String sort, String sortingValue1, int page, int size) {
+            String sort, String sortingValue1, int page, int size) {
         var pageable = validatedSortedData.getValidatedPageableData(sort, sortingValue1, page, size);
         var userId = getCurrentUser.getCurrentUserId();
         var result = paymentRepo

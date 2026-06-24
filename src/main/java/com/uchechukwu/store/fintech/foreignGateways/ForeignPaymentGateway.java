@@ -1,7 +1,7 @@
 package com.uchechukwu.store.fintech.foreignGateways;
 
+import com.uchechukwu.store.dtos.request.WebhookRequest;
 import com.uchechukwu.store.entities.Order;
-import com.uchechukwu.store.responses.WebhookRequest;
 
 import java.util.Optional;
 

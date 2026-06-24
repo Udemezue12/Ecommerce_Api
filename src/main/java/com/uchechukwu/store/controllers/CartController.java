@@ -1,13 +1,13 @@
 package com.uchechukwu.store.controllers;
 
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
 import com.uchechukwu.store.dtos.request.AllCartItemsRequest;
 import com.uchechukwu.store.dtos.request.CartItemRequest;
 import com.uchechukwu.store.dtos.request.UpdateCartItemRequest;
 import com.uchechukwu.store.dtos.response.CartItemResponse;
 import com.uchechukwu.store.dtos.response.CartResponse;
 import com.uchechukwu.store.dtos.response.ItemCartResponse;
-import com.uchechukwu.store.responses.ApiResponse;
 import com.uchechukwu.store.service.CartService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.Hidden;

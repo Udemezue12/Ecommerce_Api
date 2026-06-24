@@ -1,9 +1,9 @@
 package com.uchechukwu.store.controllers;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
 import com.uchechukwu.store.dtos.request.ProfileRequest;
 import com.uchechukwu.store.dtos.response.ProfilePageResponse;
 import com.uchechukwu.store.dtos.response.ProfileResponse;
-import com.uchechukwu.store.responses.ApiResponse;
 import com.uchechukwu.store.service.ProfileService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;

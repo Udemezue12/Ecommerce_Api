@@ -3,11 +3,9 @@ package com.uchechukwu.store.sms;
 import com.uchechukwu.store.configProperties.NotificationProperties;
 import com.uchechukwu.store.dtos.response.TermiiSmsResponse;
 import com.uchechukwu.store.exceptions.NotificationException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,20 +16,17 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+
 public class TermiiClient {
 
     private final NotificationProperties properties;
+    private final WebClient client;
 
-    private WebClient client() {
-
-        return WebClient.builder()
-                .baseUrl(properties.getTermiiBaseUrl())
-                .defaultHeader(
-                        HttpHeaders.CONTENT_TYPE,
-                        MediaType.APPLICATION_JSON_VALUE)
-                .build();
+    public TermiiClient(NotificationProperties properties, @Qualifier("termiiWebClient") WebClient client) {
+        this.properties = properties;
+        this.client = client;
     }
+
 
     public boolean ping() {
 
@@ -45,7 +40,7 @@ public class TermiiClient {
                     "channel", "generic",
                     "api_key", properties.getTermiiApiKey());
 
-            TermiiSmsResponse response = client()
+            TermiiSmsResponse response = client
                     .post()
                     .uri("/api/sms/send")
                     .bodyValue(payload)
@@ -91,14 +86,14 @@ public class TermiiClient {
                 "channel", "generic",
                 "api_key", properties.getTermiiApiKey());
 
-        var response = client()
+        var response = client
                 .post()
                 .uri("/api/sms/send")
                 .bodyValue(payload)
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::isError,
-                        clientResponse -> getMonoResponse(clientResponse))
+                        this::getMonoResponse)
                 .bodyToMono(TermiiSmsResponse.class)
                 .block();
 
@@ -143,7 +138,7 @@ public class TermiiClient {
                 "channel", "generic",
                 "api_key", properties.getTermiiApiKey());
 
-        TermiiSmsResponse response = client()
+        TermiiSmsResponse response = client
                 .post()
                 .uri("/api/sms/send")
                 .bodyValue(payload)

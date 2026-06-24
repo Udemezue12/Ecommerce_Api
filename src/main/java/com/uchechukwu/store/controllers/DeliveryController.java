@@ -1,14 +1,14 @@
 package com.uchechukwu.store.controllers;
 
 import com.uchechukwu.store.Idempotency.Idempotent;
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.dtos.request.DeliveryRequest;
 import com.uchechukwu.store.dtos.request.PageResponse;
 import com.uchechukwu.store.dtos.request.UpdateDeliveryStatusRequest;
 import com.uchechukwu.store.dtos.response.DeliveryDetailResponse;
 import com.uchechukwu.store.dtos.response.DeliveryManyResponse;
 import com.uchechukwu.store.dtos.response.DeliveryResponse;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.service.DeliveryService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,8 +71,8 @@ public class DeliveryController {
     @RateLimit
 
     public ResponseEntity<ApiResponse<PageResponse>> getAllDeliveries(@RequestParam(required = false, defaultValue = "", name = "sortingValue1") String sortingValue1, @RequestParam(required = false, defaultValue = "", name = "sort") String sort,
-                                                                                            @RequestParam(required = false, defaultValue = "0", name = "page") int page,
-                                                                                            @RequestParam(required = false, defaultValue = "10", name = "size") int size) {
+                                                                      @RequestParam(required = false, defaultValue = "0", name = "page") int page,
+                                                                      @RequestParam(required = false, defaultValue = "10", name = "size") int size) {
         var delivery = deliveryService.getAllDetailedDeliveries(sort, sortingValue1, page, size);
         return ApiResponseBuilder.success("Fetched Successfully", delivery);
     }

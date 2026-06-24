@@ -1,4 +1,4 @@
-package com.uchechukwu.store.responses;
+package com.uchechukwu.store.dtos.request;
 
 import java.util.Map;
 

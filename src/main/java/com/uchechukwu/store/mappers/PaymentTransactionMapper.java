@@ -1,8 +1,8 @@
 package com.uchechukwu.store.mappers;
 
+import com.uchechukwu.store.dtos.response.PaymentTransactionResponse;
 import com.uchechukwu.store.dtos.response.PaymentTransactionsResponse;
 import com.uchechukwu.store.entities.PaymentTransaction;
-import com.uchechukwu.store.responses.PaymentTransactionResponse;
 
 import java.util.Collections;
 import java.util.stream.Collectors;

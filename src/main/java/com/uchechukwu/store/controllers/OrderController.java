@@ -1,9 +1,9 @@
 package com.uchechukwu.store.controllers;
 
 import com.uchechukwu.store.Idempotency.Idempotent;
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.dtos.response.OrderDto;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.service.OrderService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
-    
+
 
     @PostMapping("/{cartId}/checkout/order")
     @RateLimit(times = 4, seconds = 8)

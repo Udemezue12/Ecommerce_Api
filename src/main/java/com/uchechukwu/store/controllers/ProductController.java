@@ -1,10 +1,10 @@
 package com.uchechukwu.store.controllers;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
 import com.uchechukwu.store.dtos.request.ProductRequest;
 import com.uchechukwu.store.dtos.request.ProductUpdateRequest;
 import com.uchechukwu.store.dtos.response.ProductDto;
 import com.uchechukwu.store.dtos.response.ProductsPageDto;
-import com.uchechukwu.store.responses.ApiResponse;
 import com.uchechukwu.store.service.ProductService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
 import io.swagger.v3.oas.annotations.tags.Tag;

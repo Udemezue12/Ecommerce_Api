@@ -1,6 +1,8 @@
 package com.uchechukwu.store.service;
 
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.GetCurrentUser;
 import com.uchechukwu.store.customCache.CustomCacheEvict;
 import com.uchechukwu.store.customCache.CustomCacheable;
@@ -13,8 +15,6 @@ import com.uchechukwu.store.exceptions.BadRequestException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.mappers.AddressMapper;
 import com.uchechukwu.store.repositories.AddressRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.validators.ValidatedSortedData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

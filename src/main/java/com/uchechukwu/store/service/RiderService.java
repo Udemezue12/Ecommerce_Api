@@ -1,6 +1,8 @@
 package com.uchechukwu.store.service;
 
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.core.ComputeFileHash;
 import com.uchechukwu.store.dtos.request.RiderRequest;
 import com.uchechukwu.store.dtos.request.UpdateRiderRequest;
@@ -9,8 +11,6 @@ import com.uchechukwu.store.entities.Rider;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.mappers.RiderMapper;
 import com.uchechukwu.store.repositories.RiderRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

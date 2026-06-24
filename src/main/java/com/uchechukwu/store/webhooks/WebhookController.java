@@ -1,7 +1,7 @@
 package com.uchechukwu.store.webhooks;
 
 import com.uchechukwu.store.Idempotency.Idempotent;
-import com.uchechukwu.store.responses.WebhookRequest;
+import com.uchechukwu.store.dtos.request.WebhookRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class WebhookController {
 
     private final WebhookService webhookService;
-    
+
 
     @PostMapping("/paystack")
     @Idempotent(ttl = 120)

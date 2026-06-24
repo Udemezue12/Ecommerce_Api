@@ -1,5 +1,7 @@
 package com.uchechukwu.store.service;
 
+import com.uchechukwu.store.api_builder_response.ApiResponse;
+import com.uchechukwu.store.api_builder_response.ApiResponseBuilder;
 import com.uchechukwu.store.customCache.CustomCacheEvict;
 import com.uchechukwu.store.customCache.CustomCacheable;
 import com.uchechukwu.store.dtos.request.CategoryRequest;
@@ -8,8 +10,6 @@ import com.uchechukwu.store.dtos.response.CategoryDto;
 import com.uchechukwu.store.entities.Category;
 import com.uchechukwu.store.mappers.CategoryMapper;
 import com.uchechukwu.store.repositories.CategoryRepository;
-import com.uchechukwu.store.responses.ApiResponse;
-import com.uchechukwu.store.responses.ApiResponseBuilder;
 import com.uchechukwu.store.validators.EntityValidator;
 import com.uchechukwu.store.validators.RequestValidators;
 import com.uchechukwu.store.validators.ValidatedSortedData;
