@@ -16,7 +16,7 @@ public class CorsConfig {
     private List<String> allowedOrigins;
 
     @Bean
-    public CorsConfigurationSource corsConfigSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         var config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of(

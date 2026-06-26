@@ -53,7 +53,7 @@ public class AuthenticationService {
     private final AuthenticationManager authManager;
     private final OtpRateLimit otpRateLimit;
 
-    public final JwtResponseCookie jwtResponseCookie;
+    private final JwtResponseCookie jwtResponseCookie;
 
     private final UserVerification verificationService;
     private final JobScheduler jobScheduler;
@@ -69,12 +69,13 @@ public class AuthenticationService {
         user.setVerified(false);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        userRepository.save(user);
+        var savedUser = userRepository.save(user);
 
-        var userDto = userMapper.getUserResponseDto(user);
-        if (userDto.getEmail() != null) {
-            resendVerificationEmail(userDto.getEmail());
+        if (savedUser.getEmail() != null) {
+            resendVerificationEmail(savedUser.getEmail());
         }
+        var userDto = userMapper.getUserResponseDto(savedUser);
+
 
         return ApiResponseBuilder.created(
                 "User created successfully",
