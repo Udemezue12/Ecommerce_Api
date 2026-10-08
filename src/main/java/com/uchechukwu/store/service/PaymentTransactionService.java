@@ -3,7 +3,6 @@ package com.uchechukwu.store.service;
 import com.uchechukwu.store.GatewaysController.PaymentGateway;
 import com.uchechukwu.store.core.GenerateReference;
 import com.uchechukwu.store.core.GetCurrentUser;
-import com.uchechukwu.store.customCache.CustomCacheEvict;
 import com.uchechukwu.store.customCache.CustomCacheable;
 import com.uchechukwu.store.dtos.request.PaymentRefundRequest;
 import com.uchechukwu.store.dtos.request.PaymentRequest;
@@ -12,7 +11,6 @@ import com.uchechukwu.store.dtos.response.PaymentTransactionsPageResponse;
 import com.uchechukwu.store.entities.PaymentTransaction;
 import com.uchechukwu.store.enums.OrderStatus;
 import com.uchechukwu.store.enums.PaymentStatus;
-import com.uchechukwu.store.events.PaymentSuccessEvent;
 import com.uchechukwu.store.exceptions.BadRequestException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.fintech.africanGateways.PaymentInitializeResponse;
@@ -25,11 +23,9 @@ import com.uchechukwu.store.validators.EntityValidator;
 import com.uchechukwu.store.validators.ValidatedSortedData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -38,18 +34,14 @@ import java.util.UUID;
 public class PaymentTransactionService {
     private final PaymentTransactionRepository paymentRepo;
     private final GetCurrentUser getCurrentUser;
-    private final CartService cartService;
+
     private final OrderRepository orderRepo;
     private final EntityValidator entityValidator;
-    private final OrderService orderService;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final PaymentProcessingService paymentProcessingService;
+
     private final PaymentGateway paymentGateway;
     private final ValidatedSortedData validatedSortedData;
-
-    @Transactional
-    @CustomCacheEvict(cacheNames = {
-            "userTransactions", "adminTransactions", "vendorTransactions"})
 
 
     public PaymentInitializeResponse initializePayment(UUID orderId, PaymentRequest request) {
@@ -74,23 +66,13 @@ public class PaymentTransactionService {
                 reference,
                 amount,
                 currentUser.getEmail());
+        paymentProcessingService.savePayment(payment.reference(), request.paymentMethod(), amount, currentUser, order);
 
-        var transaction = PaymentTransaction.builder()
-                .generatedReference(reference)
-                .paymentMethod(request.paymentMethod())
-                .amount(amount)
-                .user(currentUser)
-                .order(order)
-                .status(PaymentStatus.PENDING)
-                .build();
-        paymentRepo.save(transaction);
         return payment;
 
     }
 
-    @Transactional
-    @CustomCacheEvict(cacheNames = {
-            "userTransactions", "adminTransactions", "vendorTransactions"})
+
     public PaymentVerifyResponse webhookVerifyPayment(String generatedReference, PaymentTransaction transaction) {
 
         if (transaction.getStatus() == PaymentStatus.SUCCESS) {
@@ -113,7 +95,7 @@ public class PaymentTransactionService {
                 ? response.gatewayReference()
                 : generatedReference;
         var verified = response.success();
-        updatePaymentTransaction(
+        paymentProcessingService.updatePaymentTransaction(
                 transaction,
                 verified,
                 finalReference,
@@ -130,9 +112,7 @@ public class PaymentTransactionService {
                 .build();
     }
 
-    @Transactional
-    @CustomCacheEvict(cacheNames = {
-            "userTransactions", "adminTransactions", "vendorTransactions"})
+
     public PaymentVerifyResponse verifyPayment(String generatedReference) {
         var transaction = paymentRepo.findByGeneratedReference(generatedReference)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -140,58 +120,7 @@ public class PaymentTransactionService {
 
     }
 
-    @Transactional
-    public void updatePaymentTransaction(
-            PaymentTransaction transaction,
-            boolean verified,
-            String reference,
-            String transactionId,
-            String currency,
-            String channel,
-            UUID orderId, UUID userId) {
 
-        if (verified) {
-
-            transaction.setStatus(PaymentStatus.SUCCESS);
-            transaction.setVerifiedAt(LocalDateTime.now());
-            transaction.setPaidAt(LocalDateTime.now());
-            transaction.setPaymentProviderReference(reference);
-            transaction.setPaymentProviderTransactionId(transactionId);
-            transaction.setOrderProcessed(true);
-            transaction.setCurrency(currency);
-            transaction.setPaymentChannel(channel);
-
-            orderService.updateOrderStatus(orderId, OrderStatus.PAID);
-
-            cartService.clearCartByUserId(userId);
-            paymentRepo.save(transaction);
-
-            applicationEventPublisher.publishEvent(
-                    getPaymentSuccessEventPublisher(
-                            transaction,
-                            orderId));
-
-            return;
-        }
-
-        transaction.setStatus(PaymentStatus.FAILED);
-        transaction.setFailedAt(LocalDateTime.now());
-
-        paymentRepo.save(transaction);
-    }
-
-    private PaymentSuccessEvent getPaymentSuccessEventPublisher(PaymentTransaction transaction, UUID orderId) {
-        return new PaymentSuccessEvent(
-                orderId,
-                transaction.getUser().getName(),
-                transaction.getUser().getEmail(),
-                transaction.getId(),
-                transaction.getUser().getPhoneNumber());
-    }
-
-    @Transactional
-    @CustomCacheEvict(cacheNames = {
-            "userTransactions", "adminTransactions", "vendorTransactions"})
     public PaymentRefundResponse refundPayment(
             String transactionId, PaymentRefundRequest request) {
 
@@ -240,11 +169,7 @@ public class PaymentTransactionService {
                     .build();
         }
 
-        transaction.setStatus(PaymentStatus.REFUNDED);
-        transaction.setRefundedAt(LocalDateTime.now());
-        orderService.updateOrderStatus(transaction.getOrder().getId(), OrderStatus.REFUNDED);
-
-        paymentRepo.save(transaction);
+        paymentProcessingService.refundPayment(transaction);
 
 
         var amount = gateway.amount() != null

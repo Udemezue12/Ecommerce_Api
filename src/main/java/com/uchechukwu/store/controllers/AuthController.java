@@ -10,6 +10,7 @@ import com.uchechukwu.store.dtos.response.UserResponseDto;
 import com.uchechukwu.store.service.AuthenticationService;
 import com.uchechukwu.store.service.UserService;
 import com.uchechukwu.store.utilities.rateLimiter.RateLimit;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,12 +43,21 @@ public class AuthController {
         return userService.getCurrentUser();
     }
 
-    @PostMapping("/register")
+    @PostMapping("/user-register")
     @RateLimit(times = 4, seconds = 8)
     public ResponseEntity<ApiResponse<UserResponseDto>> registerUser(
             @Valid @RequestBody UserRequestDto userRequest,
             UriComponentsBuilder uriBuilder) {
         return authService.register(userRequest, uriBuilder);
+    }
+
+    @PostMapping("/register/admin-user")
+    @Hidden
+    @RateLimit(times = 4, seconds = 8)
+    public ResponseEntity<ApiResponse<UserResponseDto>> adminUser(
+            @Valid @RequestBody UserRequestDto userRequest,
+            UriComponentsBuilder uriBuilder) {
+        return authService.adminRegister(userRequest, uriBuilder);
     }
 
     @PostMapping("/login")

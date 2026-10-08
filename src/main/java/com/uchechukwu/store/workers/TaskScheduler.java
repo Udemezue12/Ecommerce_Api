@@ -4,8 +4,11 @@ import com.uchechukwu.store.configProperties.PingerProperties;
 import com.uchechukwu.store.events.MultipleImagesDeleteEvent;
 import com.uchechukwu.store.events.PaymentSuccessEvent;
 import com.uchechukwu.store.events.SingleImageDeleteEvent;
+import com.uchechukwu.store.jobrunr.JobRunrManagementService;
+import com.uchechukwu.store.service.ProductService;
 import com.uchechukwu.store.tasks.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.scheduling.cron.Cron;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,6 +19,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class TaskScheduler {
     private final JobScheduler jobScheduler;
     private final DeleteBlacklistedTokenTask cleanupToken;
@@ -24,6 +28,40 @@ public class TaskScheduler {
     private final CloudinaryImageDeleteTasks deleteImages;
     private final PingUrlTask pingUrlTask;
     private final PingerProperties properties;
+    private final ProductService productService;
+    private final JobRunrManagementService jobRunrManagementService;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void getProducts() {
+        log.info("Starting GettingProducts Jobs");
+        jobScheduler.scheduleRecurrently(
+                "get-products",
+                "0 0 0 */3 * *",
+                () -> productService.getAllProducts(
+                        "name",
+                        "name",
+                        1,
+                        10
+                )
+        );
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void deleteSuccessfulJobs() {
+        jobScheduler.scheduleRecurrently(
+                "delete-successful-jobs",
+                Cron.weekly(),
+                jobRunrManagementService::purgeSucceededJobs
+
+        );
+        jobScheduler.scheduleRecurrently(
+                "delete_successfully-deleted-jobs",
+                Cron.weekly(),
+                jobRunrManagementService::purgeDeletedJobs
+
+        );
+
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void deleteTokens() {

@@ -1,6 +1,7 @@
 package com.uchechukwu.store.fintech.africanGateways;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uchechukwu.store.enums.PaymentMethod;
 import com.uchechukwu.store.exceptions.BadRequestException;
 import com.uchechukwu.store.exceptions.PaymentException;
 import com.uchechukwu.store.fintech.FintechConstant;
@@ -8,6 +9,7 @@ import com.uchechukwu.store.interfaces.PaymentGatewayInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -85,7 +87,7 @@ public class FlutterwaveClient implements PaymentGatewayInterface {
         if (!"successful".equalsIgnoreCase(tx.status())) {
             return PaymentVerifyResponse.builder()
                     .success(false)
-                    .gateway("FLUTTERWAVE")
+                    .gateway(PaymentMethod.FLUTTERWAVE.toString())
                     .status(tx.status())
                     .txRef(tx.txRef())
                     .build();
@@ -93,7 +95,7 @@ public class FlutterwaveClient implements PaymentGatewayInterface {
 
         return PaymentVerifyResponse.builder()
                 .success(true)
-                .gateway("FLUTTERWAVE")
+                .gateway(PaymentMethod.FLUTTERWAVE.toString())
                 .transactionId(String.valueOf(tx.id()))
                 .txRef(tx.txRef())
                 .flwRef(tx.flwRef())
@@ -125,19 +127,21 @@ public class FlutterwaveClient implements PaymentGatewayInterface {
                 .uri("/transactions/{id}/refund", transactionId)
                 .bodyValue(refundPayload)
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), clientResponse -> clientResponse
-                        .bodyToMono(String.class).flatMap(errorBody -> {
-                            log.error("CRITICAL FLUTTERWAVE ERROR BODY: {}", errorBody);
-                            return Mono.error(new BadRequestException(
-                                    "Flutterwave validation failed: " + errorBody));
-                        }))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        clientResponse -> clientResponse
+                                .bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("CRITICAL FLUTTERWAVE ERROR BODY: {}", errorBody);
+                                    return Mono.error(new BadRequestException(
+                                            "Flutterwave validation failed: " + errorBody));
+                                }))
                 .bodyToMono(getParameters)
                 .timeout(timeout)
                 .block();
 
         validateResponse(response);
 
-        if (response == null || response.getData() == null) {
+        if (response.getData() == null) {
             throw new BadRequestException("Flutterwave refund response contains no data");
         }
 

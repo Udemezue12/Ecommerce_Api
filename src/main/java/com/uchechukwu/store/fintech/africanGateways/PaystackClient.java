@@ -1,6 +1,7 @@
 package com.uchechukwu.store.fintech.africanGateways;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uchechukwu.store.enums.PaymentMethod;
 import com.uchechukwu.store.exceptions.PaymentException;
 import com.uchechukwu.store.fintech.FintechConstant;
 import com.uchechukwu.store.interfaces.PaymentGatewayInterface;
@@ -72,7 +73,7 @@ public class PaystackClient implements PaymentGatewayInterface {
 
         return PaymentVerifyResponse.builder()
                 .success(response.isStatus())
-                .gateway("PAYSTACK")
+                .gateway(PaymentMethod.PAYSTACK.toString())
                 .status(tx.status())
                 .transactionId(String.valueOf(tx.id()))
                 .reference(tx.reference())

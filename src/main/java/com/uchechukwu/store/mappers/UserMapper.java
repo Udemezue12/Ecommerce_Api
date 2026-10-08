@@ -4,6 +4,7 @@ import com.uchechukwu.store.dtos.request.UserRequestDto;
 import com.uchechukwu.store.dtos.request.UserUpdateRequestDto;
 import com.uchechukwu.store.dtos.response.UserResponseDto;
 import com.uchechukwu.store.entities.User;
+import com.uchechukwu.store.enums.UserRole;
 import org.springframework.stereotype.Component;
 
 // import org.mapstruct.Mapper;
@@ -16,7 +17,7 @@ public class UserMapper {
         return new UserResponseDto(user.getId(), user.getName(), user.getEmail(), user.getIsActive(), user.getRole().name(), user.getPhoneNumber());
     }
 
-    public User toEntity(UserRequestDto dto) {
+    public User toEntity(UserRequestDto dto, UserRole role) {
 
         return User.builder()
                 .email(dto.email().trim().toLowerCase())
@@ -24,7 +25,7 @@ public class UserMapper {
                 .phoneNumber(dto.phoneNumber())
                 .password(dto.password())
                 .isActive(true)
-                .role(dto.role())
+                .role(role)
                 .build();
     }
 

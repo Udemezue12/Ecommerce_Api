@@ -10,6 +10,7 @@ import com.uchechukwu.store.dtos.request.VerifyEmailRequest;
 import com.uchechukwu.store.dtos.response.TokenResponse;
 import com.uchechukwu.store.dtos.response.UserResponseDto;
 import com.uchechukwu.store.enums.JwtType;
+import com.uchechukwu.store.enums.UserRole;
 import com.uchechukwu.store.exceptions.BadRequestException;
 import com.uchechukwu.store.exceptions.ResourceNotFoundException;
 import com.uchechukwu.store.jwt.Jwt;
@@ -62,19 +63,7 @@ public class AuthenticationService {
     @Transactional
     public ResponseEntity<ApiResponse<UserResponseDto>> register(UserRequestDto userRequest,
                                                                  UriComponentsBuilder uriBuilder) {
-        requestValidate.throwIfTrue(
-                userRepository.findByEmail(userRequest.email().trim().toLowerCase()).isPresent(),
-                "Email already exists");
-        var user = userMapper.toEntity(userRequest);
-        user.setVerified(false);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        var savedUser = userRepository.save(user);
-
-        if (savedUser.getEmail() != null) {
-            resendVerificationEmail(savedUser.getEmail());
-        }
-        var userDto = userMapper.getUserResponseDto(savedUser);
+        var userDto = getUserResponseDto(userRequest, UserRole.USER);
 
 
         return ApiResponseBuilder.created(
@@ -83,6 +72,36 @@ public class AuthenticationService {
                 userDto.getId(),
                 userDto,
                 uriBuilder);
+    }
+
+    @Transactional
+    public ResponseEntity<ApiResponse<UserResponseDto>> adminRegister(UserRequestDto userRequest,
+                                                                      UriComponentsBuilder uriBuilder) {
+        var userDto = getUserResponseDto(userRequest, UserRole.ADMIN);
+
+
+        return ApiResponseBuilder.created(
+                "User created successfully",
+                "/users/{id}",
+                userDto.getId(),
+                userDto,
+                uriBuilder);
+    }
+
+    private UserResponseDto getUserResponseDto(UserRequestDto userRequest, UserRole role) {
+        requestValidate.throwIfTrue(
+                userRepository.findByEmail(userRequest.email().trim().toLowerCase()).isPresent(),
+                "Email already exists");
+        var user = userMapper.toEntity(userRequest, role);
+        user.setVerified(false);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        var savedUser = userRepository.save(user);
+
+        if (savedUser.getEmail() != null) {
+            resendVerificationEmail(savedUser.getEmail());
+        }
+        return userMapper.getUserResponseDto(savedUser);
     }
 
     public ResponseEntity<ApiResponse<TokenResponse>> login(

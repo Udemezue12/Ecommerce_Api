@@ -82,8 +82,15 @@ public class SecurityConfig {
                         )
 
                         .ignoringRequestMatchers(
-                                "/api/v1/webhook/**", "/v3/api-docs/**",
-                                "/swagger-ui/**", "/", "/swagger-ui.html", "/templates/**", "/api/v1/webhook/**"))
+                                "/api/v1/webhook/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/",
+                                "/swagger-ui.html",
+                                "/templates/**",
+                                "/api/v1/webhook/**",
+                                "/api/v1/jobs/**"
+                        ))
 //                .csrf(AbstractHttpConfigurer::disable)
 
                 .sessionManagement(session -> session.sessionCreationPolicy(
@@ -97,7 +104,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/v1/csrf")
+                                "/api/v1/csrf",
+                                "/api/v1/jobs/**"
+                        )
                         .permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
