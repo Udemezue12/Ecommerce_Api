@@ -83,6 +83,16 @@ public class TaskScheduler {
     }
 
     @EventListener(ApplicationReadyEvent.class)
+    public void pingUrl() {
+        jobScheduler.scheduleRecurrently(
+                "ping- " + sanitize(properties.pingUrl()),
+                "0 0 */4 * *",
+                () -> pingUrlTask.pingUrl(properties.pingUrl())
+
+        );
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
     public void pingUrls() {
 
         properties.pingUrls().forEach(site ->

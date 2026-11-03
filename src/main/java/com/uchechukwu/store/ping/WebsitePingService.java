@@ -21,50 +21,45 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class WebsitePingService {
-    private final RestClient restClient;
+    private final RestClient sharedRestClient;
 
-
-    @CircuitBreaker(name = "website-ping")
+    @CircuitBreaker(
+            name = "website-ping",
+            fallbackMethod = "pingFallback"
+    )
     public PingResult ping(String url) {
         var start = System.currentTimeMillis();
-        try {
-//            var status = webClient().
-//                    get()
-//                    .uri(url)
-//                    .retrieve()
-//                    .toBodilessEntity()
-//                    .block()
-//                    .getStatusCode();
-            var response = restClient
-                    .get()
-                    .uri(url)
-                    .retrieve()
-                    .toBodilessEntity();
+        var response = sharedRestClient
+                .get()
+                .uri(url)
+                .retrieve()
+                .toBodilessEntity();
 
-            var status = response.getStatusCode();
-            var duration = System.currentTimeMillis() - start;
-            var healthy = status.is2xxSuccessful();
-            return new PingResult(
-                    url,
-                    status.value(),
-                    duration,
-                    healthy,
-                    Instant.now(),
-                    "Success"
-            );
-        } catch (Exception e) {
-            var duration = System.currentTimeMillis() - start;
+        var duration = System.currentTimeMillis() - start;
+        var status = response.getStatusCode();
 
-            log.error("Ping failed for {}", url, e);
+        return new PingResult(
+                url,
+                status.value(),
+                duration,
+                status.is2xxSuccessful(),
+                Instant.now(),
+                "Website responded successfully"
+        );
+    }
 
-            return new PingResult(
-                    url,
-                    0,
-                    duration,
-                    false,
-                    Instant.now(),
-                    e.getMessage());
-        }
+    public PingResult pingFallback(String url, Throwable exception) {
+
+        log.error("Website ping failed for {}: {}", url, exception.getMessage());
+
+        return new PingResult(
+                url,
+                0,
+                0,
+                false,
+                Instant.now(),
+                exception.getMessage()
+        );
     }
 
     private WebClient webClient() {
