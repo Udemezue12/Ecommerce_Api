@@ -85,19 +85,17 @@ public class TaskScheduler {
     @EventListener(ApplicationReadyEvent.class)
     public void pingUrl() {
         jobScheduler.scheduleRecurrently(
-                "ping- " + sanitize(properties.pingUrl()),
+                "ping" + sanitize(properties.pingUrl()),
                 "0 0 */4 * *",
                 () -> pingUrlTask.pingUrl(properties.pingUrl())
-
         );
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void pingUrls() {
-
         properties.pingUrls().forEach(site ->
                 jobScheduler.scheduleRecurrently(
-                        "ping-" + sanitize(site),
+                        "ping" + sanitize(site),
                         "*/8 * * * *",
                         () -> pingUrlTask.pingUrl(site)
                 )
@@ -105,12 +103,11 @@ public class TaskScheduler {
     }
 
     private String sanitize(String url) {
+        if (url == null || url.isBlank()) {
+            return "Default";
+        }
 
-        return url
-                .replace("https://", "")
-                .replace("http://", "")
-                .replaceAll("[^a-zA-Z0-9]", "-");
-
+        return url.replaceAll("[^a-zA-Z0-9]", "");
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
