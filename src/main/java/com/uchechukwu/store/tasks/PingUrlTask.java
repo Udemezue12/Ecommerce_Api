@@ -22,7 +22,7 @@ public class PingUrlTask {
         log.info("Starting website health check");
 
         var results =
-                websiteMonitoringService.pingAll(properties.pingUrls());
+                websiteMonitoringService.pingAll(properties.pingRegularUrls());
 
         var healthy =
                 results.stream()
