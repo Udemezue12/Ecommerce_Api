@@ -20,7 +20,7 @@ public class WebsiteHealthScheduler {
     @Scheduled(fixedDelay = 300000)
     public void monitorWebsites() {
 
-        properties.pingUrls().forEach(url -> {
+        properties.pingRegularUrls().forEach(url -> {
 
             PingResult result = pingService.ping(url);
 
