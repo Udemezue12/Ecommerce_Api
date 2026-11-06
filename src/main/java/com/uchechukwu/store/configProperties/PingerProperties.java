@@ -6,8 +6,8 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "pingers")
 public record PingerProperties(
-        List<String> pingUrls,
-        String pingUrl
+        List<String> pingRegularUrls,
+        List<String> pingCacheUrls
 ) {
 }
 

@@ -131,8 +131,8 @@ application:
   author-email: ${AUTHOR_EMAIL}
   author-url: ${AUTHOR_URL}
 pingers:
-  ping-urls: ${URLS}
-  ping-url: ${URL}
+  ping-regular-urls: ${REGULAR_URLS}
+  ping-cache-urls: ${CACHE_URLS}
 
 
 
