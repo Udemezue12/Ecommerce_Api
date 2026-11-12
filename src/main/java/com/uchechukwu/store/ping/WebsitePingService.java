@@ -2,7 +2,7 @@ package com.uchechukwu.store.ping;
 
 
 import com.uchechukwu.store.dtos.response.PingResult;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -21,41 +22,70 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class WebsitePingService {
+
     private final RestClient sharedRestClient;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
-    @CircuitBreaker(
-            name = "website-ping",
-            fallbackMethod = "pingFallback"
-    )
     public PingResult ping(String url) {
-        var start = System.currentTimeMillis();
-        var response = sharedRestClient
-                .get()
-                .uri(url)
-                .retrieve()
-                .toBodilessEntity();
 
-        var duration = System.currentTimeMillis() - start;
-        var status = response.getStatusCode();
+        var start = System.nanoTime();
 
-        return new PingResult(
-                url,
-                status.value(),
-                duration,
-                status.is2xxSuccessful(),
-                Instant.now(),
-                "Website responded successfully"
-        );
+        try {
+            var uri = URI.create(url);
+
+            String breakerName = "website-ping-" + uri.getHost();
+
+            var circuitBreaker = circuitBreakerRegistry.circuitBreaker(
+                    breakerName,
+                    "website-ping"
+            );
+
+            return circuitBreaker.executeSupplier(() -> doPing(uri, start));
+
+        } catch (Exception ex) {
+            return pingFallback(url, start, ex);
+        }
     }
 
-    public PingResult pingFallback(String url, Throwable exception) {
+    private PingResult doPing(URI uri, long start) {
 
-        log.error("Website ping failed for {}: {}", url, exception.getMessage());
+        return sharedRestClient
+                .get()
+                .uri(uri)
+                .exchange((request, clientResponse) -> {
+                    int status = clientResponse.getStatusCode().value();
+
+                    long duration = TimeUnit.NANOSECONDS.toMillis(
+                            System.nanoTime() - start
+                    );
+                    return new PingResult(
+                            uri.toString(),
+                            status,
+                            duration,
+                            status >= 200 && status < 300,
+                            Instant.now(),
+                            "HTTP response received"
+                    );
+                });
+    }
+
+    private PingResult pingFallback(
+            String url,
+            long start,
+            Throwable exception
+    ) {
+
+        long duration = TimeUnit.NANOSECONDS.toMillis(
+                System.nanoTime() - start
+        );
+
+        log.warn("Website ping failed for {}: {}", url,
+                exception.toString());
 
         return new PingResult(
                 url,
                 0,
-                0,
+                duration,
                 false,
                 Instant.now(),
                 exception.getMessage()
@@ -67,10 +97,7 @@ public class WebsitePingService {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 20000)
                 .responseTimeout(Duration.ofSeconds(30))
                 .doOnConnected(
-                        connection -> {
-
-                            connection.addHandlerFirst(new ReadTimeoutHandler(10, TimeUnit.SECONDS));
-                        }
+                        connection -> connection.addHandlerFirst(new ReadTimeoutHandler(10, TimeUnit.SECONDS))
                 );
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
