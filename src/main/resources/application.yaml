@@ -141,16 +141,16 @@ pingers:
 
 
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      website-ping:
-        sliding-window-type: COUNT_BASED
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 60
-        wait-duration-in-open-state: 60s
-        permitted-number-of-calls-in-half-open-state: 10
-        automatic-transition-from-open-to-half-open-enabled: true
-        slow-call-duration-threshold: 55s
-        slow-call-rate-threshold: 80
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      website-ping:
+#        sliding-window-type: COUNT_BASED
+#        sliding-window-size: 10
+#        minimum-number-of-calls: 5
+#        failure-rate-threshold: 60
+#        wait-duration-in-open-state: 60s
+#        permitted-number-of-calls-in-half-open-state: 10
+#        automatic-transition-from-open-to-half-open-enabled: true
+#        slow-call-duration-threshold: 55s
+#        slow-call-rate-threshold: 80

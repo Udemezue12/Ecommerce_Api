@@ -1,8 +1,9 @@
 package com.uchechukwu.store.ping;
 
 
+import com.uchechukwu.store.core.TrimWhiteSpace;
 import com.uchechukwu.store.dtos.response.PingResult;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.RequiredArgsConstructor;
@@ -24,73 +25,66 @@ import java.util.concurrent.TimeUnit;
 public class WebsitePingService {
 
     private final RestClient sharedRestClient;
-    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
+
+    @CircuitBreaker(name = "website-ping")
     public PingResult ping(String url) {
 
-        var start = System.nanoTime();
+        var start = System.currentTimeMillis();
 
         try {
-            var uri = URI.create(url);
 
-            String breakerName = "website-ping-" + uri.getHost();
+            var uri = URI.create(normalizeUrl(url));
 
-            var circuitBreaker = circuitBreakerRegistry.circuitBreaker(
-                    breakerName,
-                    "website-ping"
+            var response = sharedRestClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            var duration = System.currentTimeMillis() - start;
+            log.info("Ping Success for {}", url);
+
+            return new PingResult(
+                    uri.toString(),
+                    response.getStatusCode().value(),
+                    duration,
+                    response.getStatusCode().is2xxSuccessful(),
+                    Instant.now(),
+                    "Success"
             );
 
-            return circuitBreaker.executeSupplier(() -> doPing(uri, start));
-
         } catch (Exception ex) {
-            return pingFallback(url, start, ex);
+
+            var duration = System.currentTimeMillis() - start;
+
+            log.error("Ping failed for {}", url, ex);
+
+            return new PingResult(
+                    url,
+                    0,
+                    duration,
+                    false,
+                    Instant.now(),
+                    ex.getMessage()
+            );
         }
     }
 
-    private PingResult doPing(URI uri, long start) {
+    private String normalizeUrl(String url) {
 
-        return sharedRestClient
-                .get()
-                .uri(uri)
-                .exchange((request, clientResponse) -> {
-                    int status = clientResponse.getStatusCode().value();
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("URL cannot be blank");
+        }
 
-                    long duration = TimeUnit.NANOSECONDS.toMillis(
-                            System.nanoTime() - start
-                    );
-                    return new PingResult(
-                            uri.toString(),
-                            status,
-                            duration,
-                            status >= 200 && status < 300,
-                            Instant.now(),
-                            "HTTP response received"
-                    );
-                });
+        url = TrimWhiteSpace.trimWhiteSpaceWithUpperCase(url, false);
+
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        return url;
     }
 
-    private PingResult pingFallback(
-            String url,
-            long start,
-            Throwable exception
-    ) {
-
-        long duration = TimeUnit.NANOSECONDS.toMillis(
-                System.nanoTime() - start
-        );
-
-        log.warn("Website ping failed for {}: {}", url,
-                exception.toString());
-
-        return new PingResult(
-                url,
-                0,
-                duration,
-                false,
-                Instant.now(),
-                exception.getMessage()
-        );
-    }
 
     private WebClient webClient() {
         var httpClient = HttpClient.create()

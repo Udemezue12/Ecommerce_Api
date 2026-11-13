@@ -87,14 +87,14 @@ public class TaskScheduler {
     public void pingUrls() {
         properties.pingCacheUrls().forEach(site ->
                 jobScheduler.scheduleRecurrently(
-                        "ping" + sanitize(site),
+                        "cache-ping" + sanitize(site),
                         java.time.Duration.ofDays(3),
                         () -> pingUrlTask.pingUrl(site)
                 )
         );
         properties.pingRegularUrls().forEach(site ->
                 jobScheduler.scheduleRecurrently(
-                        "ping" + sanitize(site),
+                        "regular-ping" + sanitize(site),
                         "*/8 * * * *",
                         () -> pingUrlTask.pingUrl(site)
                 )
